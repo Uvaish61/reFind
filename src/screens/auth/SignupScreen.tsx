@@ -27,7 +27,12 @@ function validate(values: { firstName: string; lastName: string; email: string; 
   return nextErrors;
 }
 
-export default function SignupScreen() {
+type SignupScreenProps = {
+  onSignInPress?: () => void;
+  onBackToRoot?: () => void;
+};
+
+export default function SignupScreen({ onSignInPress, onBackToRoot }: SignupScreenProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -120,10 +125,14 @@ export default function SignupScreen() {
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Already have an account?</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={onSignInPress ?? onBackToRoot} activeOpacity={0.8}>
               <Text style={styles.footerLink}> Sign in</Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity onPress={onBackToRoot} activeOpacity={0.8} style={styles.rootLink}>
+            <Text style={styles.rootLinkText}>Back to screens</Text>
+          </TouchableOpacity>
         </Animated.View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -150,4 +159,6 @@ const styles = StyleSheet.create({
   footerRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 16 },
   footerText: { color: Colors.muted },
   footerLink: { color: Colors.purple, fontWeight: '700' },
+  rootLink: { alignSelf: 'center', marginTop: 10, paddingVertical: 8, paddingHorizontal: 12 },
+  rootLinkText: { color: Colors.muted, fontSize: 12 },
 });
