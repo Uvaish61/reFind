@@ -30,9 +30,10 @@ function validate(values: { firstName: string; lastName: string; email: string; 
 type SignupScreenProps = {
   onSignInPress?: () => void;
   onBackToRoot?: () => void;
+  onContinueAsGuest?: () => void;
 };
 
-export default function SignupScreen({ onSignInPress, onBackToRoot }: SignupScreenProps) {
+export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAsGuest }: SignupScreenProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -133,6 +134,14 @@ export default function SignupScreen({ onSignInPress, onBackToRoot }: SignupScre
           <TouchableOpacity onPress={onBackToRoot} activeOpacity={0.8} style={styles.rootLink}>
             <Text style={styles.rootLinkText}>Back to screens</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={onContinueAsGuest ?? onBackToRoot}
+            activeOpacity={0.8}
+            style={styles.guestButton}
+          >
+            <Text style={styles.guestButtonText}>Continue as Guest</Text>
+          </TouchableOpacity>
         </Animated.View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -161,4 +170,6 @@ const styles = StyleSheet.create({
   footerLink: { color: Colors.purple, fontWeight: '700' },
   rootLink: { alignSelf: 'center', marginTop: 10, paddingVertical: 8, paddingHorizontal: 12 },
   rootLinkText: { color: Colors.muted, fontSize: 12 },
+  guestButton: { alignSelf: 'center', marginTop: 8, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 999, backgroundColor: '#0C1318', borderWidth: 1, borderColor: '#1F2937' },
+  guestButtonText: { color: Colors.text, fontWeight: '600', fontSize: 13 },
 });
