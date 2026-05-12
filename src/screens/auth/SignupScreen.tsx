@@ -101,11 +101,19 @@ export default function SignupScreen() {
 
           <GradientButton title={loading ? 'Creating account...' : 'Continue'} onPress={handleContinue} disabled={!canSubmit || loading} loading={loading} />
 
+          <View style={styles.dividerWrap}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
           <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn}>
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.85} onPress={() => Alert.alert('Placeholder', 'Apple sign-in will be added later.')}>
+              <View style={styles.socialIcon}><Text style={styles.socialIconText}></Text></View>
               <Text style={styles.socialText}>Apple</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialBtn}>
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.85} onPress={() => Alert.alert('Placeholder', 'Google sign-in will be added later.')}>
+              <View style={[styles.socialIcon, styles.googleIcon]}><Text style={styles.socialIconText}>G</Text></View>
               <Text style={styles.socialText}>Google</Text>
             </TouchableOpacity>
           </View>
@@ -130,8 +138,14 @@ const styles = StyleSheet.create({
   sub: { color: Colors.muted, marginTop: 6 },
   formWrap: { paddingHorizontal: 20, marginTop: 8 },
   row: { flexDirection: 'row' },
+  dividerWrap: { flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#1E293B' },
+  dividerText: { color: Colors.muted, fontSize: 12, marginHorizontal: 12 },
   socialRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
-  socialBtn: { flex: 1, backgroundColor: '#0C1318', paddingVertical: 12, borderRadius: 10, alignItems: 'center', marginHorizontal: 6 },
+  socialBtn: { flex: 1, backgroundColor: '#0C1318', paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginHorizontal: 6, flexDirection: 'row', justifyContent: 'center' },
+  socialIcon: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  googleIcon: { backgroundColor: '#1F2937' },
+  socialIconText: { color: Colors.text, fontSize: 12, fontWeight: '700' },
   socialText: { color: Colors.text, fontWeight: '600' },
   footerRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 16 },
   footerText: { color: Colors.muted },
