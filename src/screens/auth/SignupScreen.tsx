@@ -1,14 +1,54 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Colors } from '../../theme';
 import TextField from '../../components/inputs/TextField';
 import GradientButton from '../../components/buttons/GradientButton';
+
+type Errors = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+};
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validate(values: { firstName: string; lastName: string; email: string; password: string }) {
+  const nextErrors: Errors = {};
+
+  if (!values.firstName.trim()) nextErrors.firstName = 'First name is required';
+  if (!values.lastName.trim()) nextErrors.lastName = 'Last name is required';
+  if (!values.email.trim()) nextErrors.email = 'Email is required';
+  else if (!emailPattern.test(values.email.trim())) nextErrors.email = 'Enter a valid email';
+
+  if (!values.password.trim()) nextErrors.password = 'Password is required';
+  else if (values.password.trim().length < 8) nextErrors.password = 'Use at least 8 characters';
+
+  return nextErrors;
+}
 
 export default function SignupScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<Errors>({});
+  const [loading, setLoading] = useState(false);
+
+  const canSubmit = firstName.trim() && lastName.trim() && email.trim() && password.trim() && Object.keys(validate({ firstName, lastName, email, password })).length === 0;
+
+  const handleContinue = () => {
+    const nextErrors = validate({ firstName, lastName, email, password });
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      Alert.alert('Saved', 'This is a UI-only screen for now.');
+    }, 800);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -22,18 +62,18 @@ export default function SignupScreen() {
         <View style={styles.formWrap}>
           <View style={styles.row}>
             <View style={{ flex: 1, marginRight: 8 }}>
-              <TextField label="First name" placeholder="First name" value={firstName} onChangeText={setFirstName} />
+              <TextField label="First name" placeholder="First name" value={firstName} onChangeText={(text) => { setFirstName(text); if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: undefined })); }} error={errors.firstName} />
             </View>
             <View style={{ flex: 1, marginLeft: 8 }}>
-              <TextField label="Last name" placeholder="Last name" value={lastName} onChangeText={setLastName} />
+              <TextField label="Last name" placeholder="Last name" value={lastName} onChangeText={(text) => { setLastName(text); if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: undefined })); }} error={errors.lastName} />
             </View>
           </View>
 
-          <TextField label="Email" placeholder="Enter your email" keyboardType="email-address" value={email} onChangeText={setEmail} />
+          <TextField label="Email" placeholder="Enter your email" keyboardType="email-address" value={email} onChangeText={(text) => { setEmail(text); if (errors.email) setErrors((prev) => ({ ...prev, email: undefined })); }} error={errors.email} />
 
-          <TextField label="Password" placeholder="Create a password" secure value={password} onChangeText={setPassword} />
+          <TextField label="Password" placeholder="Create a password" secure value={password} onChangeText={(text) => { setPassword(text); if (errors.password) setErrors((prev) => ({ ...prev, password: undefined })); }} error={errors.password} />
 
-          <GradientButton title="Continue" onPress={() => { /* placeholder */ }} />
+          <GradientButton title={loading ? 'Creating account...' : 'Continue'} onPress={handleContinue} disabled={!canSubmit || loading} loading={loading} />
 
           <View style={styles.socialRow}>
             <TouchableOpacity style={styles.socialBtn}>

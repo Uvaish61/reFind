@@ -2,6 +2,17 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View, ViewStyle, ActivityIndicator } from 'react-native';
 import { Colors } from '../../theme';
 
+let LinearGradient: React.ComponentType<any> | null = null;
+
+try {
+  // Optional native dependency for RN CLI projects.
+  // The app still renders without it while the dependency is being set up.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  LinearGradient = require('react-native-linear-gradient').default;
+} catch {
+  LinearGradient = null;
+}
+
 type Props = {
   title: string;
   onPress?: () => void;
@@ -18,7 +29,16 @@ export default function GradientButton({ title, onPress, style, disabled, loadin
       disabled={disabled || loading}
       style={[styles.button, disabled || loading ? styles.disabled : null, style]}
     >
-      <View style={styles.gradientFake} />
+      {LinearGradient ? (
+        <LinearGradient
+          colors={['#7C3AED', '#F97316', '#FBBF24']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.gradientFill}
+        />
+      ) : (
+        <View style={styles.gradientFallback} />
+      )}
       {loading ? <ActivityIndicator color={Colors.text} /> : <Text style={styles.title}>{title}</Text>}
     </TouchableOpacity>
   );
@@ -34,9 +54,12 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginTop: 6,
   },
-  gradientFake: {
+  gradientFill: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'linear-gradient(90deg, #7C3AED 0%, #F59E0B 100%)',
+  },
+  gradientFallback: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#7C3AED',
     opacity: 0.95,
   } as ViewStyle,
   title: { color: Colors.text, fontWeight: '700', zIndex: 2 },
