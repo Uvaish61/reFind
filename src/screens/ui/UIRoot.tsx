@@ -1,35 +1,55 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { Colors } from '../../theme';
+import HomeScreen from '../home/HomeScreen';
+
+type Screen = 'menu' | 'home' | 'search' | 'collections' | 'dashboard' | 'savePreview';
 
 export default function UIRoot() {
+  const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
+
+  if (currentScreen === 'home') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+        <HomeScreen />
+        <TouchableOpacity
+          onPress={() => setCurrentScreen('menu')}
+          style={styles.backButton}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.backText}>← Back to menu</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>reFind — UI Playground</Text>
       <Text style={styles.subtitle}>UI-first: browse and open screen placeholders.</Text>
 
       <View style={styles.list}>
-        <TouchableOpacity style={styles.card}>
-          <Text style={styles.cardTitle}>Home (placeholder)</Text>
+        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('home')} activeOpacity={0.8}>
+          <Text style={styles.cardTitle}>Home</Text>
           <Text style={styles.cardMeta}>Main feed with Reel cards</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('savePreview')} activeOpacity={0.8}>
           <Text style={styles.cardTitle}>Save Preview</Text>
           <Text style={styles.cardMeta}>Preview shared link before saving</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('search')} activeOpacity={0.8}>
           <Text style={styles.cardTitle}>Search</Text>
           <Text style={styles.cardMeta}>Search UI and filters</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('collections')} activeOpacity={0.8}>
           <Text style={styles.cardTitle}>Collections</Text>
           <Text style={styles.cardMeta}>Collections grid/list</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('dashboard')} activeOpacity={0.8}>
           <Text style={styles.cardTitle}>Dashboard</Text>
           <Text style={styles.cardMeta}>Analytics & stats</Text>
         </TouchableOpacity>
