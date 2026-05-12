@@ -66,4 +66,6 @@ const styles = StyleSheet.create({
   card: { backgroundColor: Colors.card, padding: 16, borderRadius: 12, marginBottom: 12 },
   cardTitle: { color: Colors.text, fontWeight: '700', fontSize: 16 },
   cardMeta: { color: Colors.muted, marginTop: 6 },
+  backButton: { position: 'absolute', bottom: 20, left: 20, paddingVertical: 12, paddingHorizontal: 16, backgroundColor: Colors.card, borderRadius: 10, borderWidth: 1, borderColor: '#1F2937' },
+  backText: { color: Colors.purple, fontWeight: '600', fontSize: 14 },
 });
