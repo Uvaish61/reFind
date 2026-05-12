@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { Colors } from '../../theme';
 import HomeScreen from '../home/HomeScreen';
+import SignInScreen from '../auth/SignInScreen';
 
-type Screen = 'menu' | 'home' | 'search' | 'collections' | 'dashboard' | 'savePreview';
+type Screen = 'menu' | 'home' | 'signin' | 'search' | 'collections' | 'dashboard' | 'savePreview';
 
 export default function UIRoot() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
@@ -12,6 +13,21 @@ export default function UIRoot() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
         <HomeScreen />
+        <TouchableOpacity
+          onPress={() => setCurrentScreen('menu')}
+          style={styles.backButton}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.backText}>← Back to menu</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  if (currentScreen === 'signin') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+        <SignInScreen onBackToRoot={() => setCurrentScreen('menu')} />
         <TouchableOpacity
           onPress={() => setCurrentScreen('menu')}
           style={styles.backButton}
@@ -34,9 +50,9 @@ export default function UIRoot() {
           <Text style={styles.cardMeta}>Main feed with Reel cards</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('savePreview')} activeOpacity={0.8}>
-          <Text style={styles.cardTitle}>Save Preview</Text>
-          <Text style={styles.cardMeta}>Preview shared link before saving</Text>
+        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('signin')} activeOpacity={0.8}>
+          <Text style={styles.cardTitle}>Sign In</Text>
+          <Text style={styles.cardMeta}>Login with email/password</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('search')} activeOpacity={0.8}>
