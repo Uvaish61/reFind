@@ -4,8 +4,9 @@ import { Colors } from '../../theme';
 import HomeScreen from '../home/HomeScreen';
 import SignInScreen from '../auth/SignInScreen';
 import SearchScreen from '../search/SearchScreen';
+import SavePreviewScreen from '../savePreview/SavePreviewScreen';
 
-type Screen = 'menu' | 'home' | 'signin' | 'search' | 'collections' | 'dashboard' | 'savePreview';
+type Screen = 'menu' | 'home' | 'signin' | 'search' | 'savePreview' | 'collections' | 'dashboard';
 
 export default function UIRoot() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
@@ -55,6 +56,14 @@ export default function UIRoot() {
     );
   }
 
+  if (currentScreen === 'savePreview') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+        <SavePreviewScreen onCancelPress={() => setCurrentScreen('menu')} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>reFind — UI Playground</Text>
@@ -74,6 +83,11 @@ export default function UIRoot() {
         <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('search')} activeOpacity={0.8}>
           <Text style={styles.cardTitle}>Search</Text>
           <Text style={styles.cardMeta}>Search UI and filters</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('savePreview')} activeOpacity={0.8}>
+          <Text style={styles.cardTitle}>Save Preview</Text>
+          <Text style={styles.cardMeta}>Save link with notes & tags</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.card} onPress={() => setCurrentScreen('collections')} activeOpacity={0.8}>
