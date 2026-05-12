@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, Animated, Easing } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, Animated, Easing, ScrollView } from 'react-native';
 import { Colors } from '../../theme';
 import TextField from '../../components/inputs/TextField';
 import GradientButton from '../../components/buttons/GradientButton';
@@ -85,99 +85,101 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <View style={styles.header}>
-          <Animated.View style={[styles.logoBox, { transform: [{ scale: logoScale }] }]} />
-          <Text style={styles.heading}>Create your reFind account</Text>
-          <Text style={styles.sub}>Save now. Find later.</Text>
-        </View>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <Animated.View style={[styles.logoBox, { transform: [{ scale: logoScale }] }]} />
+            <Text style={styles.heading}>Create your reFind account</Text>
+            <Text style={styles.sub}>Save now. Find later.</Text>
+          </View>
 
-        <Animated.View style={[styles.formWrap, { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] }]}>
-          <View style={styles.row}>
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <TextField label="First name" placeholder="First name" value={firstName} onChangeText={(text) => { setFirstName(text); if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: undefined })); }} error={errors.firstName} />
+          <Animated.View style={[styles.formWrap, { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] }]}>
+            <View style={styles.row}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <TextField label="First name" placeholder="First name" value={firstName} onChangeText={(text) => { setFirstName(text); if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: undefined })); }} error={errors.firstName} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <TextField label="Last name" placeholder="Last name" value={lastName} onChangeText={(text) => { setLastName(text); if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: undefined })); }} error={errors.lastName} />
+              </View>
             </View>
-            <View style={{ flex: 1, marginLeft: 8 }}>
-              <TextField label="Last name" placeholder="Last name" value={lastName} onChangeText={(text) => { setLastName(text); if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: undefined })); }} error={errors.lastName} />
+
+            <TextField label="Email" placeholder="Enter your email" keyboardType="email-address" value={email} onChangeText={(text) => { setEmail(text); if (errors.email) setErrors((prev) => ({ ...prev, email: undefined })); }} error={errors.email} />
+
+            <TextField label="Password" placeholder="Create a password" secure value={password} onChangeText={(text) => { setPassword(text); if (errors.password) setErrors((prev) => ({ ...prev, password: undefined })); }} error={errors.password} />
+
+            <GradientButton
+              title={loading ? 'Creating account...' : 'Continue'}
+              onPress={handleContinue}
+              disabled={!canSubmit || loading}
+              loading={loading}
+            />
+
+            <View style={styles.dividerWrap}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or continue with</Text>
+              <View style={styles.dividerLine} />
             </View>
-          </View>
 
-          <TextField label="Email" placeholder="Enter your email" keyboardType="email-address" value={email} onChangeText={(text) => { setEmail(text); if (errors.email) setErrors((prev) => ({ ...prev, email: undefined })); }} error={errors.email} />
+            <View style={styles.socialRow}>
+              <TouchableOpacity
+                style={styles.socialBtn}
+                activeOpacity={0.85}
+                onPress={() => Alert.alert('Placeholder', 'Apple sign-in will be added later.')}
+                accessibilityRole="button"
+                accessibilityLabel="Continue with Apple"
+                accessibilityHint="Shows a placeholder message for Apple sign in"
+              >
+                <View style={styles.socialIcon}><Text style={styles.socialIconText}></Text></View>
+                <Text style={styles.socialText}>Apple</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.socialBtn}
+                activeOpacity={0.85}
+                onPress={() => Alert.alert('Placeholder', 'Google sign-in will be added later.')}
+                accessibilityRole="button"
+                accessibilityLabel="Continue with Google"
+                accessibilityHint="Shows a placeholder message for Google sign in"
+              >
+                <View style={[styles.socialIcon, styles.googleIcon]}><Text style={styles.socialIconText}>G</Text></View>
+                <Text style={styles.socialText}>Google</Text>
+              </TouchableOpacity>
+            </View>
 
-          <TextField label="Password" placeholder="Create a password" secure value={password} onChangeText={(text) => { setPassword(text); if (errors.password) setErrors((prev) => ({ ...prev, password: undefined })); }} error={errors.password} />
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>Already have an account?</Text>
+              <TouchableOpacity
+                onPress={onSignInPress ?? onBackToRoot}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Go to sign in"
+                accessibilityHint="Returns to the sign in screen or the screen list"
+              >
+                <Text style={styles.footerLink}> Sign in</Text>
+              </TouchableOpacity>
+            </View>
 
-          <GradientButton
-            title={loading ? 'Creating account...' : 'Continue'}
-            onPress={handleContinue}
-            disabled={!canSubmit || loading}
-            loading={loading}
-          />
-
-          <View style={styles.dividerWrap}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or continue with</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <View style={styles.socialRow}>
             <TouchableOpacity
-              style={styles.socialBtn}
-              activeOpacity={0.85}
-              onPress={() => Alert.alert('Placeholder', 'Apple sign-in will be added later.')}
-              accessibilityRole="button"
-              accessibilityLabel="Continue with Apple"
-              accessibilityHint="Shows a placeholder message for Apple sign in"
-            >
-              <View style={styles.socialIcon}><Text style={styles.socialIconText}></Text></View>
-              <Text style={styles.socialText}>Apple</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.socialBtn}
-              activeOpacity={0.85}
-              onPress={() => Alert.alert('Placeholder', 'Google sign-in will be added later.')}
-              accessibilityRole="button"
-              accessibilityLabel="Continue with Google"
-              accessibilityHint="Shows a placeholder message for Google sign in"
-            >
-              <View style={[styles.socialIcon, styles.googleIcon]}><Text style={styles.socialIconText}>G</Text></View>
-              <Text style={styles.socialText}>Google</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Already have an account?</Text>
-            <TouchableOpacity
-              onPress={onSignInPress ?? onBackToRoot}
+              onPress={onBackToRoot}
               activeOpacity={0.8}
+              style={styles.rootLink}
               accessibilityRole="button"
-              accessibilityLabel="Go to sign in"
-              accessibilityHint="Returns to the sign in screen or the screen list"
+              accessibilityLabel="Back to screens"
+              accessibilityHint="Returns to the placeholder screen list"
             >
-              <Text style={styles.footerLink}> Sign in</Text>
+              <Text style={styles.rootLinkText}>Back to screens</Text>
             </TouchableOpacity>
-          </View>
 
-          <TouchableOpacity
-            onPress={onBackToRoot}
-            activeOpacity={0.8}
-            style={styles.rootLink}
-            accessibilityRole="button"
-            accessibilityLabel="Back to screens"
-            accessibilityHint="Returns to the placeholder screen list"
-          >
-            <Text style={styles.rootLinkText}>Back to screens</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={onContinueAsGuest ?? onBackToRoot}
-            activeOpacity={0.8}
-            style={styles.guestButton}
-            accessibilityRole="button"
-            accessibilityLabel="Continue as guest"
-            accessibilityHint="Skips sign up and continues into the app as a guest"
-          >
-            <Text style={styles.guestButtonText}>Continue as Guest</Text>
-          </TouchableOpacity>
-        </Animated.View>
+            <TouchableOpacity
+              onPress={onContinueAsGuest ?? onBackToRoot}
+              activeOpacity={0.8}
+              style={styles.guestButton}
+              accessibilityRole="button"
+              accessibilityLabel="Continue as guest"
+              accessibilityHint="Skips sign up and continues into the app as a guest"
+            >
+              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -185,11 +187,12 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { padding: 24, alignItems: 'center' },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 28 },
+  header: { paddingTop: 8, paddingBottom: 16, alignItems: 'center', width: '100%', maxWidth: 440, alignSelf: 'center' },
   logoBox: { width: 96, height: 96, borderRadius: 22, backgroundColor: Colors.purple, marginBottom: 12, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 18, elevation: 8 },
   heading: { color: Colors.text, fontSize: 20, fontWeight: '800', textAlign: 'center' },
   sub: { color: Colors.muted, marginTop: 6 },
-  formWrap: { paddingHorizontal: 20, marginTop: 8 },
+  formWrap: { width: '100%', maxWidth: 440, alignSelf: 'center', marginTop: 8, padding: 18, backgroundColor: '#0F1724', borderRadius: 20, borderWidth: 1, borderColor: '#162033', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 14, elevation: 5 },
   row: { flexDirection: 'row' },
   dividerWrap: { flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 10 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#1E293B' },
