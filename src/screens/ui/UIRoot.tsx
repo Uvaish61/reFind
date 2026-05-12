@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } fr
 import { Colors } from '../../theme';
 import HomeScreen from '../home/HomeScreen';
 import SignInScreen from '../auth/SignInScreen';
+import SearchScreen from '../search/SearchScreen';
 
 type Screen = 'menu' | 'home' | 'signin' | 'search' | 'collections' | 'dashboard' | 'savePreview';
 
@@ -28,6 +29,21 @@ export default function UIRoot() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
         <SignInScreen onBackToRoot={() => setCurrentScreen('menu')} />
+        <TouchableOpacity
+          onPress={() => setCurrentScreen('menu')}
+          style={styles.backButton}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.backText}>← Back to menu</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  if (currentScreen === 'search') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+        <SearchScreen />
         <TouchableOpacity
           onPress={() => setCurrentScreen('menu')}
           style={styles.backButton}
