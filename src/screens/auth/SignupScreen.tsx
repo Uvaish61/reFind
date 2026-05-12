@@ -105,7 +105,12 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
 
           <TextField label="Password" placeholder="Create a password" secure value={password} onChangeText={(text) => { setPassword(text); if (errors.password) setErrors((prev) => ({ ...prev, password: undefined })); }} error={errors.password} />
 
-          <GradientButton title={loading ? 'Creating account...' : 'Continue'} onPress={handleContinue} disabled={!canSubmit || loading} loading={loading} />
+          <GradientButton
+            title={loading ? 'Creating account...' : 'Continue'}
+            onPress={handleContinue}
+            disabled={!canSubmit || loading}
+            loading={loading}
+          />
 
           <View style={styles.dividerWrap}>
             <View style={styles.dividerLine} />
@@ -114,11 +119,25 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
           </View>
 
           <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.85} onPress={() => Alert.alert('Placeholder', 'Apple sign-in will be added later.')}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              activeOpacity={0.85}
+              onPress={() => Alert.alert('Placeholder', 'Apple sign-in will be added later.')}
+              accessibilityRole="button"
+              accessibilityLabel="Continue with Apple"
+              accessibilityHint="Shows a placeholder message for Apple sign in"
+            >
               <View style={styles.socialIcon}><Text style={styles.socialIconText}></Text></View>
               <Text style={styles.socialText}>Apple</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.85} onPress={() => Alert.alert('Placeholder', 'Google sign-in will be added later.')}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              activeOpacity={0.85}
+              onPress={() => Alert.alert('Placeholder', 'Google sign-in will be added later.')}
+              accessibilityRole="button"
+              accessibilityLabel="Continue with Google"
+              accessibilityHint="Shows a placeholder message for Google sign in"
+            >
               <View style={[styles.socialIcon, styles.googleIcon]}><Text style={styles.socialIconText}>G</Text></View>
               <Text style={styles.socialText}>Google</Text>
             </TouchableOpacity>
@@ -126,12 +145,25 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Already have an account?</Text>
-            <TouchableOpacity onPress={onSignInPress ?? onBackToRoot} activeOpacity={0.8}>
+            <TouchableOpacity
+              onPress={onSignInPress ?? onBackToRoot}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Go to sign in"
+              accessibilityHint="Returns to the sign in screen or the screen list"
+            >
               <Text style={styles.footerLink}> Sign in</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity onPress={onBackToRoot} activeOpacity={0.8} style={styles.rootLink}>
+          <TouchableOpacity
+            onPress={onBackToRoot}
+            activeOpacity={0.8}
+            style={styles.rootLink}
+            accessibilityRole="button"
+            accessibilityLabel="Back to screens"
+            accessibilityHint="Returns to the placeholder screen list"
+          >
             <Text style={styles.rootLinkText}>Back to screens</Text>
           </TouchableOpacity>
 
@@ -139,6 +171,9 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
             onPress={onContinueAsGuest ?? onBackToRoot}
             activeOpacity={0.8}
             style={styles.guestButton}
+            accessibilityRole="button"
+            accessibilityLabel="Continue as guest"
+            accessibilityHint="Skips sign up and continues into the app as a guest"
           >
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
           </TouchableOpacity>
