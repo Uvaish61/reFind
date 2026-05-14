@@ -131,7 +131,7 @@ export default function SavePreviewScreen({ onSavePress, onCancelPress }: SavePr
                 </TouchableOpacity>
               </View>
             )}
-            keyExtractor={(item, idx) => idx.toString()}
+            keyExtractor={(item) => item}
             horizontal
             scrollEnabled={false}
             contentContainerStyle={styles.tagsContainer}

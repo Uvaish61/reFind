@@ -48,7 +48,7 @@ export default function SplashScreen({ onFinish }: Props) {
         }).start(() => onFinish());
       }, 2000);
     });
-  }, []);
+  }, [onFinish]);
 
   function startDotLoop() {
     const pulse = dotAnims.map((anim, i) =>

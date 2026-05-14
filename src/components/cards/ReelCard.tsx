@@ -27,7 +27,6 @@ export default function ReelCard({ id, title, thumbnail, platform, tags = [], co
         <Image
           source={{ uri: thumbnail }}
           style={styles.thumbnail}
-          defaultSource={require('../../assets/placeholder.png')}
         />
       ) : (
         <View style={styles.placeholderThumbnail} />

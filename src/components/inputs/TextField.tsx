@@ -8,7 +8,7 @@ type Props = {
   value?: string;
   onChangeText?: (t: string) => void;
   secure?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'numeric';
+  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad' | 'number-pad' | 'decimal-pad' | 'url';
   error?: string;
 };
 

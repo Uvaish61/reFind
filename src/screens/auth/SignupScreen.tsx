@@ -65,7 +65,7 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
         useNativeDriver: true,
       }),
     ]).start();
-  }, [cardOpacity, cardTranslateY, logoScale]);
+  }, []);
 
   const canSubmit = firstName.trim() && lastName.trim() && email.trim() && password.trim() && Object.keys(validate({ firstName, lastName, email, password })).length === 0;
 
