@@ -5,11 +5,16 @@ import HomeScreen from '../home/HomeScreen';
 import SignInScreen from '../auth/SignInScreen';
 import SearchScreen from '../search/SearchScreen';
 import SavePreviewScreen from '../savePreview/SavePreviewScreen';
+import SplashScreen from '../splash/SplashScreen';
 
-type Screen = 'menu' | 'home' | 'signin' | 'search' | 'savePreview' | 'collections' | 'dashboard';
+type Screen = 'splash' | 'menu' | 'home' | 'signin' | 'search' | 'savePreview' | 'collections' | 'dashboard';
 
 export default function UIRoot() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
+
+  if (currentScreen === 'splash') {
+    return <SplashScreen onFinish={() => setCurrentScreen('menu')} />;
+  }
 
   if (currentScreen === 'home') {
     return (
