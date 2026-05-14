@@ -13,7 +13,9 @@ export default function SplashScreen({ onFinish }: Props) {
   const scaleAnim = useRef(new Animated.Value(0.6)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const taglineFade = useRef(new Animated.Value(0)).current;
+  const screenFade = useRef(new Animated.Value(1)).current;
   const dotAnims = useRef(Array.from({ length: DOT_COUNT }, () => new Animated.Value(0.3))).current;
+  const dotLoop = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
     Animated.parallel([
@@ -35,8 +37,16 @@ export default function SplashScreen({ onFinish }: Props) {
         useNativeDriver: true,
       }).start();
 
-      startDotLoop();
-      setTimeout(onFinish, 2000);
+      dotLoop.current = startDotLoop();
+
+      setTimeout(() => {
+        dotLoop.current?.stop();
+        Animated.timing(screenFade, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start(() => onFinish());
+      }, 2000);
     });
   }, []);
 
@@ -48,11 +58,13 @@ export default function SplashScreen({ onFinish }: Props) {
         Animated.timing(anim, { toValue: 0.3, duration: 300, useNativeDriver: true }),
       ])
     );
-    Animated.loop(Animated.parallel(pulse)).start();
+    const loop = Animated.loop(Animated.parallel(pulse));
+    loop.start();
+    return loop;
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: screenFade }]}>
       <Animated.View style={[styles.logoBox, { transform: [{ scale: scaleAnim }], opacity: fadeAnim }]}>
         <View style={styles.logoSquare} />
       </Animated.View>
@@ -68,7 +80,7 @@ export default function SplashScreen({ onFinish }: Props) {
           <Animated.View key={i} style={[styles.dot, { opacity: anim }]} />
         ))}
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
 
