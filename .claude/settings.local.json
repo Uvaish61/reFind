@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"d:\\\\self\\\\reFind\" -Force)",
-      "Bash(Select-Object Name, FullName, PSIsContainer)"
+      "Bash(Select-Object Name, FullName, PSIsContainer)",
+      "Bash(npm --version)"
     ]
   }
 }
