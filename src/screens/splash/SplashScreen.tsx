@@ -6,9 +6,14 @@ interface Props {
   onFinish: () => void;
 }
 
+const DOT_COUNT = 3;
+const DOT_DELAY = 200;
+
 export default function SplashScreen({ onFinish }: Props) {
   const scaleAnim = useRef(new Animated.Value(0.6)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const taglineFade = useRef(new Animated.Value(0)).current;
+  const dotAnims = useRef(Array.from({ length: DOT_COUNT }, () => new Animated.Value(0.3))).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -24,16 +29,45 @@ export default function SplashScreen({ onFinish }: Props) {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      setTimeout(onFinish, 1200);
+      Animated.timing(taglineFade, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+
+      startDotLoop();
+      setTimeout(onFinish, 2000);
     });
   }, []);
+
+  function startDotLoop() {
+    const pulse = dotAnims.map((anim, i) =>
+      Animated.sequence([
+        Animated.delay(i * DOT_DELAY),
+        Animated.timing(anim, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.timing(anim, { toValue: 0.3, duration: 300, useNativeDriver: true }),
+      ])
+    );
+    Animated.loop(Animated.parallel(pulse)).start();
+  }
 
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.logoBox, { transform: [{ scale: scaleAnim }], opacity: fadeAnim }]}>
         <View style={styles.logoSquare} />
       </Animated.View>
+
       <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>reFind</Animated.Text>
+
+      <Animated.Text style={[styles.tagline, { opacity: taglineFade }]}>
+        Save it. Find it. Keep it.
+      </Animated.Text>
+
+      <Animated.View style={[styles.dotsRow, { opacity: taglineFade }]}>
+        {dotAnims.map((anim, i) => (
+          <Animated.View key={i} style={[styles.dot, { opacity: anim }]} />
+        ))}
+      </Animated.View>
     </View>
   );
 }
@@ -59,5 +93,22 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '700',
     letterSpacing: 1,
+  },
+  tagline: {
+    color: Colors.muted,
+    fontSize: 14,
+    marginTop: 8,
+    letterSpacing: 0.5,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    marginTop: 40,
+    gap: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.purple,
   },
 });
