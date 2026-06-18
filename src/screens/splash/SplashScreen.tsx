@@ -18,6 +18,20 @@ export default function SplashScreen({ onFinish }: Props) {
   const dotLoop = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
+    function startDotLoop() {
+      const pulse = dotAnims.map((anim, i) =>
+        Animated.sequence([
+          Animated.delay(i * DOT_DELAY),
+          Animated.timing(anim, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(anim, { toValue: 0.3, duration: 300, useNativeDriver: true }),
+        ])
+      );
+
+      const loop = Animated.loop(Animated.parallel(pulse));
+      loop.start();
+      return loop;
+    }
+
     Animated.parallel([
       Animated.spring(scaleAnim, {
         toValue: 1,
@@ -48,20 +62,7 @@ export default function SplashScreen({ onFinish }: Props) {
         }).start(() => onFinish());
       }, 2000);
     });
-  }, [onFinish]);
-
-  function startDotLoop() {
-    const pulse = dotAnims.map((anim, i) =>
-      Animated.sequence([
-        Animated.delay(i * DOT_DELAY),
-        Animated.timing(anim, { toValue: 1, duration: 300, useNativeDriver: true }),
-        Animated.timing(anim, { toValue: 0.3, duration: 300, useNativeDriver: true }),
-      ])
-    );
-    const loop = Animated.loop(Animated.parallel(pulse));
-    loop.start();
-    return loop;
-  }
+  }, [dotAnims, fadeAnim, onFinish, screenFade, scaleAnim, taglineFade]);
 
   return (
     <Animated.View style={[styles.container, { opacity: screenFade }]}>

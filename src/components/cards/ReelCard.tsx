@@ -20,7 +20,7 @@ const platformColors: Record<string, string> = {
   link: '#7C3AED',
 };
 
-export default function ReelCard({ id, title, thumbnail, platform, tags = [], collectionName, onPress }: Props) {
+export default function ReelCard({ title, thumbnail, platform, tags = [], collectionName, onPress }: Props) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.container}>
       {thumbnail ? (

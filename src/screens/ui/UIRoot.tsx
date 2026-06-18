@@ -18,7 +18,7 @@ export default function UIRoot() {
 
   if (currentScreen === 'home') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+      <SafeAreaView style={styles.screenContainer}>
         <HomeScreen />
         <TouchableOpacity
           onPress={() => setCurrentScreen('menu')}
@@ -33,7 +33,7 @@ export default function UIRoot() {
 
   if (currentScreen === 'signin') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+      <SafeAreaView style={styles.screenContainer}>
         <SignInScreen onBackToRoot={() => setCurrentScreen('menu')} />
         <TouchableOpacity
           onPress={() => setCurrentScreen('menu')}
@@ -48,7 +48,7 @@ export default function UIRoot() {
 
   if (currentScreen === 'search') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+      <SafeAreaView style={styles.screenContainer}>
         <SearchScreen />
         <TouchableOpacity
           onPress={() => setCurrentScreen('menu')}
@@ -63,7 +63,7 @@ export default function UIRoot() {
 
   if (currentScreen === 'savePreview') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+      <SafeAreaView style={styles.screenContainer}>
         <SavePreviewScreen onCancelPress={() => setCurrentScreen('menu')} />
       </SafeAreaView>
     );
@@ -110,6 +110,7 @@ export default function UIRoot() {
 }
 
 const styles = StyleSheet.create({
+  screenContainer: { flex: 1, backgroundColor: Colors.background },
   container: { flexGrow: 1, padding: 24, backgroundColor: Colors.background },
   title: { color: Colors.text, fontSize: 22, fontWeight: '700', marginBottom: 6 },
   subtitle: { color: Colors.muted, marginBottom: 18 },

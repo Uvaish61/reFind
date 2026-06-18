@@ -59,7 +59,7 @@ export default function SignInScreen({ onSignUpPress, onBackToRoot, onContinueAs
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [cardOpacity, cardTranslateY, logoScale]);
 
   const canSubmit = email.trim() && password.trim() && Object.keys(validate({ email, password })).length === 0;
 
@@ -78,7 +78,7 @@ export default function SignInScreen({ onSignUpPress, onBackToRoot, onContinueAs
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
             <Animated.View style={[styles.logoBox, { transform: [{ scale: logoScale }] }]} />
@@ -144,7 +144,7 @@ export default function SignInScreen({ onSignUpPress, onBackToRoot, onContinueAs
                 accessibilityHint="Shows a placeholder message for Apple sign in"
               >
                 <View style={styles.socialIcon}>
-                  <Text style={styles.socialIconText}></Text>
+                  <Text style={styles.socialIconText} />
                 </View>
                 <Text style={styles.socialText}>Apple</Text>
               </TouchableOpacity>
@@ -206,6 +206,7 @@ export default function SignInScreen({ onSignUpPress, onBackToRoot, onContinueAs
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+  keyboardView: { flex: 1 },
   scrollContent: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 28 },
   header: { paddingTop: 8, paddingBottom: 16, alignItems: 'center', width: '100%', maxWidth: 440, alignSelf: 'center' },
   logoBox: {

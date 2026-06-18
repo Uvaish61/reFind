@@ -23,11 +23,11 @@ export default function AuthScreen() {
             </TouchableOpacity>
           </View>
 
-          <View style={{ marginTop: 18 }}>
+          <View style={styles.formSection}>
             <Text style={styles.placeholderText}>This is a placeholder for the {isLogin ? 'Login' : 'Sign up'} form.</Text>
           </View>
 
-          <View style={{ marginTop: 18 }}>
+          <View style={styles.formSection}>
             <TouchableOpacity style={styles.primaryButton}>
               <Text style={styles.primaryButtonText}>{isLogin ? 'Log in' : 'Create account'}</Text>
             </TouchableOpacity>
@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
   modeActive: { backgroundColor: 'rgba(124,58,237,0.12)', borderRadius: 8 },
   modeText: { color: Colors.muted, fontWeight: '600' },
   modeTextActive: { color: Colors.purple },
+  formSection: { marginTop: 18 },
   placeholderText: { color: Colors.text },
   primaryButton: { marginTop: 6, backgroundColor: Colors.purple, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   primaryButtonText: { color: Colors.text, fontWeight: '700' },

@@ -7,7 +7,6 @@ let LinearGradient: React.ComponentType<any> | null = null;
 try {
   // Optional native dependency for RN CLI projects.
   // The app still renders without it while the dependency is being set up.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   LinearGradient = require('react-native-linear-gradient').default;
 } catch {
   LinearGradient = null;

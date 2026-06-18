@@ -65,7 +65,7 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [cardOpacity, cardTranslateY, logoScale]);
 
   const canSubmit = firstName.trim() && lastName.trim() && email.trim() && password.trim() && Object.keys(validate({ firstName, lastName, email, password })).length === 0;
 
@@ -84,7 +84,7 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
             <Animated.View style={[styles.logoBox, { transform: [{ scale: logoScale }] }]} />
@@ -94,10 +94,10 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
 
           <Animated.View style={[styles.formWrap, { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] }]}>
             <View style={styles.row}>
-              <View style={{ flex: 1, marginRight: 8 }}>
+              <View style={styles.nameLeft}>
                 <TextField label="First name" placeholder="First name" value={firstName} onChangeText={(text) => { setFirstName(text); if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: undefined })); }} error={errors.firstName} />
               </View>
-              <View style={{ flex: 1, marginLeft: 8 }}>
+              <View style={styles.nameRight}>
                 <TextField label="Last name" placeholder="Last name" value={lastName} onChangeText={(text) => { setLastName(text); if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: undefined })); }} error={errors.lastName} />
               </View>
             </View>
@@ -187,6 +187,7 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+  keyboardView: { flex: 1 },
   scrollContent: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 28 },
   header: { paddingTop: 8, paddingBottom: 16, alignItems: 'center', width: '100%', maxWidth: 440, alignSelf: 'center' },
   logoBox: { width: 96, height: 96, borderRadius: 22, backgroundColor: Colors.purple, marginBottom: 12, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 18, elevation: 8 },
@@ -194,6 +195,8 @@ const styles = StyleSheet.create({
   sub: { color: Colors.muted, marginTop: 6 },
   formWrap: { width: '100%', maxWidth: 440, alignSelf: 'center', marginTop: 8, padding: 18, backgroundColor: '#0F1724', borderRadius: 20, borderWidth: 1, borderColor: '#162033', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 14, elevation: 5 },
   row: { flexDirection: 'row' },
+  nameLeft: { flex: 1, marginRight: 8 },
+  nameRight: { flex: 1, marginLeft: 8 },
   dividerWrap: { flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 10 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#1E293B' },
   dividerText: { color: Colors.muted, fontSize: 12, marginHorizontal: 12 },
