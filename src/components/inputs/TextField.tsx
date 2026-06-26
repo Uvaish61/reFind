@@ -35,7 +35,7 @@ export default function TextField({ label, placeholder, value, onChangeText, sec
           </TouchableOpacity>
         ) : null}
       </View>
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 }
@@ -43,10 +43,18 @@ export default function TextField({ label, placeholder, value, onChangeText, sec
 const styles = StyleSheet.create({
   container: { marginBottom: 12 },
   label: { color: Colors.muted, fontSize: 13, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0B1117', borderRadius: 10, paddingHorizontal: 12, borderWidth: 1, borderColor: 'transparent' },
-  inputRowError: { borderColor: '#F87171' },
-  input: { flex: 1, color: Colors.text, paddingVertical: 12 },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.inputBg,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  inputRowError: { borderColor: Colors.error },
+  input: { flex: 1, color: Colors.text, paddingVertical: 14, fontSize: 15 },
   eyeBtn: { paddingHorizontal: 8, paddingVertical: 8 },
   eyeText: { color: Colors.muted, fontSize: 13 },
-  errorText: { color: '#F87171', marginTop: 6, fontSize: 12 },
+  errorText: { color: Colors.error, marginTop: 5, fontSize: 12 },
 });

@@ -1,198 +1,250 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, Animated, Easing, ScrollView } from 'react-native';
-import { Smartphone, Globe } from 'lucide-react-native';
+import {
+  View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView,
+  Platform, Alert, Animated, Easing, ScrollView,
+} from 'react-native';
 import { Colors } from '../../theme';
 import TextField from '../../components/inputs/TextField';
 import GradientButton from '../../components/buttons/GradientButton';
 
 type Errors = {
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   email?: string;
   password?: string;
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validate(values: { firstName: string; lastName: string; email: string; password: string }) {
-  const nextErrors: Errors = {};
-
-  if (!values.firstName.trim()) nextErrors.firstName = 'First name is required';
-  if (!values.lastName.trim()) nextErrors.lastName = 'Last name is required';
-  if (!values.email.trim()) nextErrors.email = 'Email is required';
-  else if (!emailPattern.test(values.email.trim())) nextErrors.email = 'Enter a valid email';
-
-  if (!values.password.trim()) nextErrors.password = 'Password is required';
-  else if (values.password.trim().length < 8) nextErrors.password = 'Use at least 8 characters';
-
-  return nextErrors;
+function validate(values: { fullName: string; email: string; password: string }) {
+  const errs: Errors = {};
+  if (!values.fullName.trim()) errs.fullName = 'Full name is required';
+  if (!values.email.trim()) errs.email = 'Email is required';
+  else if (!emailPattern.test(values.email.trim())) errs.email = 'Enter a valid email';
+  if (!values.password.trim()) errs.password = 'Password is required';
+  else if (values.password.trim().length < 8) errs.password = 'Min 8 characters';
+  return errs;
 }
 
-type SignupScreenProps = {
+function SocialCircle({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity style={styles.socialCircle} onPress={onPress} activeOpacity={0.75}>
+      <Text style={styles.socialCircleText}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+type Props = {
   onSignInPress?: () => void;
   onBackToRoot?: () => void;
   onContinueAsGuest?: () => void;
 };
 
-export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAsGuest }: SignupScreenProps) {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAsGuest }: Props) {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<Errors>({});
   const [loading, setLoading] = useState(false);
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-  const cardTranslateY = useRef(new Animated.Value(18)).current;
-  const logoScale = useRef(new Animated.Value(0.92)).current;
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(24)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(cardOpacity, {
-        toValue: 1,
-        duration: 420,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardTranslateY, {
-        toValue: 0,
-        duration: 420,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.spring(logoScale, {
-        toValue: 1,
-        friction: 7,
-        tension: 60,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
     ]).start();
-  }, [cardOpacity, cardTranslateY, logoScale]);
+  }, [fadeAnim, slideAnim]);
 
-  const canSubmit = firstName.trim() && lastName.trim() && email.trim() && password.trim() && Object.keys(validate({ firstName, lastName, email, password })).length === 0;
+  const canSubmit = !!(fullName.trim() && email.trim() && password.trim() && Object.keys(validate({ fullName, email, password })).length === 0);
 
   const handleContinue = () => {
-    const nextErrors = validate({ firstName, lastName, email, password });
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) return;
-
+    const errs = validate({ fullName, email, password });
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert('Saved', 'This is a UI-only screen for now.');
-    }, 800);
+    setTimeout(() => { setLoading(false); Alert.alert('Done', 'UI only for now.'); }, 800);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardView}>
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* White curved header */}
           <View style={styles.header}>
-            <Animated.View style={[styles.logoBox, { transform: [{ scale: logoScale }] }]} />
-            <Text style={styles.heading}>Create your reFind account</Text>
-            <Text style={styles.sub}>Save now. Find later.</Text>
+            <View style={styles.headerTopRow}>
+              <View style={styles.logoMark} />
+              <TouchableOpacity onPress={onSignInPress ?? onBackToRoot} activeOpacity={0.8}>
+                <Text style={styles.headerAction}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.bigTitle}>Create{'\n'}Account</Text>
           </View>
 
-          <Animated.View style={[styles.formWrap, { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] }]}>
-            <View style={styles.row}>
-              <View style={styles.nameLeft}>
-                <TextField label="First name" placeholder="First name" value={firstName} onChangeText={(text) => { setFirstName(text); if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: undefined })); }} error={errors.firstName} />
-              </View>
-              <View style={styles.nameRight}>
-                <TextField label="Last name" placeholder="Last name" value={lastName} onChangeText={(text) => { setLastName(text); if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: undefined })); }} error={errors.lastName} />
-              </View>
-            </View>
+          {/* Dark form area */}
+          <Animated.View style={[styles.form, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+            <Text style={styles.fieldLabel}>Full Name</Text>
+            <TextField
+              placeholder="Enter your full name"
+              value={fullName}
+              onChangeText={(t) => { setFullName(t); if (errors.fullName) setErrors(p => ({ ...p, fullName: undefined })); }}
+              error={errors.fullName}
+            />
 
-            <TextField label="Email" placeholder="Enter your email" keyboardType="email-address" value={email} onChangeText={(text) => { setEmail(text); if (errors.email) setErrors((prev) => ({ ...prev, email: undefined })); }} error={errors.email} />
+            <Text style={styles.fieldLabel}>Email</Text>
+            <TextField
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={(t) => { setEmail(t); if (errors.email) setErrors(p => ({ ...p, email: undefined })); }}
+              error={errors.email}
+            />
 
-            <TextField label="Password" placeholder="Create a password" secure value={password} onChangeText={(text) => { setPassword(text); if (errors.password) setErrors((prev) => ({ ...prev, password: undefined })); }} error={errors.password} />
+            <Text style={styles.fieldLabel}>Password</Text>
+            <TextField
+              placeholder="Create a password"
+              secure
+              value={password}
+              onChangeText={(t) => { setPassword(t); if (errors.password) setErrors(p => ({ ...p, password: undefined })); }}
+              error={errors.password}
+            />
 
             <GradientButton
-              title={loading ? 'Creating account...' : 'Continue'}
+              title={loading ? 'Creating account...' : 'Sign Up'}
               onPress={handleContinue}
               disabled={!canSubmit || loading}
               loading={loading}
             />
 
-            <View style={styles.dividerWrap}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
+            <View style={styles.divRow}>
+              <View style={styles.divLine} />
+              <Text style={styles.divText}>or Sign Up with</Text>
+              <View style={styles.divLine} />
             </View>
 
             <View style={styles.socialRow}>
-              <TouchableOpacity
-                style={styles.socialBtn}
-                activeOpacity={0.85}
-                onPress={() => Alert.alert('Placeholder', 'Apple sign-in will be added later.')}
-                accessibilityRole="button"
-                accessibilityLabel="Continue with Apple"
-              >
-                <Smartphone size={18} color={Colors.text} style={styles.socialIconSpacing} />
-                <Text style={styles.socialText}>Apple</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.socialBtn}
-                activeOpacity={0.85}
-                onPress={() => Alert.alert('Placeholder', 'Google sign-in will be added later.')}
-                accessibilityRole="button"
-                accessibilityLabel="Continue with Google"
-              >
-                <Globe size={18} color={Colors.text} style={styles.socialIconSpacing} />
-                <Text style={styles.socialText}>Google</Text>
-              </TouchableOpacity>
+              <SocialCircle label="G" onPress={() => Alert.alert('', 'Google coming soon.')} />
+              <SocialCircle label="IG" onPress={() => Alert.alert('', 'Instagram coming soon.')} />
+              <SocialCircle label="X" onPress={() => Alert.alert('', 'X / Twitter coming soon.')} />
+              <SocialCircle label="Tt" onPress={() => Alert.alert('', 'TikTok coming soon.')} />
             </View>
 
             <View style={styles.footerRow}>
               <Text style={styles.footerText}>Already have an account?</Text>
-              <TouchableOpacity
-                onPress={onSignInPress ?? onBackToRoot}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel="Go to sign in"
-              >
-                <Text style={styles.footerLink}> Sign in</Text>
+              <TouchableOpacity onPress={onSignInPress ?? onBackToRoot} activeOpacity={0.8}>
+                <Text style={styles.footerLink}> Sign In</Text>
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              onPress={onContinueAsGuest ?? onBackToRoot}
-              activeOpacity={0.8}
-              style={styles.guestButton}
-              accessibilityRole="button"
-              accessibilityLabel="Continue as guest"
-            >
-              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            <TouchableOpacity onPress={onContinueAsGuest ?? onBackToRoot} activeOpacity={0.8} style={styles.guestBtn}>
+              <Text style={styles.guestText}>Continue as Guest</Text>
             </TouchableOpacity>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  keyboardView: { flex: 1 },
-  scrollContent: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 28 },
-  header: { paddingTop: 8, paddingBottom: 16, alignItems: 'center', width: '100%', maxWidth: 440, alignSelf: 'center' },
-  logoBox: { width: 96, height: 96, borderRadius: 22, backgroundColor: Colors.purple, marginBottom: 12, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 18, elevation: 8 },
-  heading: { color: Colors.text, fontSize: 20, fontWeight: '800', textAlign: 'center' },
-  sub: { color: Colors.muted, marginTop: 6 },
-  formWrap: { width: '100%', maxWidth: 440, alignSelf: 'center', marginTop: 8, padding: 18, backgroundColor: '#0F1724', borderRadius: 20, borderWidth: 1, borderColor: '#162033', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 14, elevation: 5 },
-  row: { flexDirection: 'row' },
-  nameLeft: { flex: 1, marginRight: 8 },
-  nameRight: { flex: 1, marginLeft: 8 },
-  dividerWrap: { flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 10 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#1E293B' },
-  dividerText: { color: Colors.muted, fontSize: 12, marginHorizontal: 12 },
-  socialRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
-  socialBtn: { flex: 1, backgroundColor: '#0C1318', paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginHorizontal: 6, flexDirection: 'row', justifyContent: 'center' },
-  socialIconSpacing: { marginRight: 8 },
-  socialText: { color: Colors.text, fontWeight: '600' },
-  footerRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 16 },
-  footerText: { color: Colors.muted },
-  footerLink: { color: Colors.purple, fontWeight: '700' },
-  guestButton: { alignSelf: 'center', marginTop: 8, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 999, backgroundColor: '#0C1318', borderWidth: 1, borderColor: '#1F2937' },
-  guestButtonText: { color: Colors.text, fontWeight: '600', fontSize: 13 },
+  flex: { flex: 1 },
+  scroll: { flexGrow: 1 },
+
+  header: {
+    backgroundColor: '#FFFFFF',
+    paddingTop: 24,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  logoMark: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#0B0B0F',
+  },
+  headerAction: {
+    color: '#0B0B0F',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  bigTitle: {
+    color: '#0B0B0F',
+    fontSize: 44,
+    fontWeight: '800',
+    letterSpacing: -1.5,
+    lineHeight: 50,
+  },
+
+  form: {
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 40,
+  },
+  fieldLabel: {
+    color: Colors.muted,
+    fontSize: 13,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+
+  divRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 22,
+  },
+  divLine: { flex: 1, height: 1, backgroundColor: Colors.border },
+  divText: { color: Colors.muted, fontSize: 12, marginHorizontal: 12 },
+
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 14,
+    marginBottom: 28,
+  },
+  socialCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  socialCircleText: {
+    color: Colors.text,
+    fontWeight: '700',
+    fontSize: 13,
+  },
+
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  footerText: { color: Colors.muted, fontSize: 14 },
+  footerLink: { color: Colors.purpleLight, fontWeight: '700', fontSize: 14 },
+
+  guestBtn: {
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  guestText: { color: Colors.muted, fontSize: 13 },
 });

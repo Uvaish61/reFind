@@ -1,27 +1,22 @@
 export const Colors = {
-  // Backgrounds
-  background: '#F4F4FF',
-  card: '#FFFFFF',
-  inputBg: '#F0F0F8',
+  background: '#0B0B0F',
+  card: '#141420',
+  inputBg: '#1C1C28',
 
-  // Brand
-  purple: '#6C63FF',
-  purpleLight: '#EEF0FF',
-  purpleDark: '#4B44CC',
+  purple: '#7C3AED',
+  purpleLight: '#A78BFA',
+  purpleDark: '#5B21B6',
 
-  // Text
-  text: '#1A1A2E',
-  textSecondary: '#4A4A6A',
-  muted: '#9494B0',
+  text: '#FFFFFF',
+  textSecondary: '#B0B0CC',
+  muted: '#888899',
 
-  // Borders & misc
-  border: '#E4E4F0',
+  border: '#2A2A3A',
   white: '#FFFFFF',
   error: '#EF4444',
 
-  // Dark screens (splash, onboarding)
   darkBg: '#0B0B0F',
-  darkCard: '#0F1724',
+  darkCard: '#141420',
 };
 
 export default { Colors };
