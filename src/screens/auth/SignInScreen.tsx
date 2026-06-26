@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, Animated, Easing, ScrollView } from 'react-native';
+import { Smartphone, Globe } from 'lucide-react-native';
 import { Colors } from '../../theme';
 import TextField from '../../components/inputs/TextField';
 import GradientButton from '../../components/buttons/GradientButton';
@@ -143,9 +144,7 @@ export default function SignInScreen({ onSignUpPress, onBackToRoot, onContinueAs
                 accessibilityLabel="Continue with Apple"
                 accessibilityHint="Shows a placeholder message for Apple sign in"
               >
-                <View style={styles.socialIcon}>
-                  <Text style={styles.socialIconText} />
-                </View>
+                <Smartphone size={18} color={Colors.text} style={styles.socialIconSpacing} />
                 <Text style={styles.socialText}>Apple</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -156,9 +155,7 @@ export default function SignInScreen({ onSignUpPress, onBackToRoot, onContinueAs
                 accessibilityLabel="Continue with Google"
                 accessibilityHint="Shows a placeholder message for Google sign in"
               >
-                <View style={[styles.socialIcon, styles.googleIcon]}>
-                  <Text style={styles.socialIconText}>G</Text>
-                </View>
+                <Globe size={18} color={Colors.text} style={styles.socialIconSpacing} />
                 <Text style={styles.socialText}>Google</Text>
               </TouchableOpacity>
             </View>
@@ -242,9 +239,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  socialIcon: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  googleIcon: { backgroundColor: '#1F2937' },
-  socialIconText: { color: Colors.text, fontSize: 12, fontWeight: '700' },
+  socialIconSpacing: { marginRight: 8 },
   socialText: { color: Colors.text, fontWeight: '600' },
   footerRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 16 },
   footerText: { color: Colors.muted },

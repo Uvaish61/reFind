@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, Animated, Easing, ScrollView } from 'react-native';
+import { Smartphone, Globe } from 'lucide-react-native';
 import { Colors } from '../../theme';
 import TextField from '../../components/inputs/TextField';
 import GradientButton from '../../components/buttons/GradientButton';
@@ -126,9 +127,8 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
                 onPress={() => Alert.alert('Placeholder', 'Apple sign-in will be added later.')}
                 accessibilityRole="button"
                 accessibilityLabel="Continue with Apple"
-                accessibilityHint="Shows a placeholder message for Apple sign in"
               >
-                <View style={styles.socialIcon}><Text style={styles.socialIconText}></Text></View>
+                <Smartphone size={18} color={Colors.text} style={styles.socialIconSpacing} />
                 <Text style={styles.socialText}>Apple</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -137,9 +137,8 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
                 onPress={() => Alert.alert('Placeholder', 'Google sign-in will be added later.')}
                 accessibilityRole="button"
                 accessibilityLabel="Continue with Google"
-                accessibilityHint="Shows a placeholder message for Google sign in"
               >
-                <View style={[styles.socialIcon, styles.googleIcon]}><Text style={styles.socialIconText}>G</Text></View>
+                <Globe size={18} color={Colors.text} style={styles.socialIconSpacing} />
                 <Text style={styles.socialText}>Google</Text>
               </TouchableOpacity>
             </View>
@@ -151,7 +150,6 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel="Go to sign in"
-                accessibilityHint="Returns to the sign in screen or the screen list"
               >
                 <Text style={styles.footerLink}> Sign in</Text>
               </TouchableOpacity>
@@ -163,7 +161,6 @@ export default function SignupScreen({ onSignInPress, onBackToRoot, onContinueAs
               style={styles.guestButton}
               accessibilityRole="button"
               accessibilityLabel="Continue as guest"
-              accessibilityHint="Skips sign up and continues into the app as a guest"
             >
               <Text style={styles.guestButtonText}>Continue as Guest</Text>
             </TouchableOpacity>
@@ -191,15 +188,11 @@ const styles = StyleSheet.create({
   dividerText: { color: Colors.muted, fontSize: 12, marginHorizontal: 12 },
   socialRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
   socialBtn: { flex: 1, backgroundColor: '#0C1318', paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginHorizontal: 6, flexDirection: 'row', justifyContent: 'center' },
-  socialIcon: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  googleIcon: { backgroundColor: '#1F2937' },
-  socialIconText: { color: Colors.text, fontSize: 12, fontWeight: '700' },
+  socialIconSpacing: { marginRight: 8 },
   socialText: { color: Colors.text, fontWeight: '600' },
   footerRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 16 },
   footerText: { color: Colors.muted },
   footerLink: { color: Colors.purple, fontWeight: '700' },
-  rootLink: { alignSelf: 'center', marginTop: 10, paddingVertical: 8, paddingHorizontal: 12 },
-  rootLinkText: { color: Colors.muted, fontSize: 12 },
   guestButton: { alignSelf: 'center', marginTop: 8, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 999, backgroundColor: '#0C1318', borderWidth: 1, borderColor: '#1F2937' },
   guestButtonText: { color: Colors.text, fontWeight: '600', fontSize: 13 },
 });

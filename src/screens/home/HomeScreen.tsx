@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { Search, Plus, Video } from 'lucide-react-native';
 import { Colors } from '../../theme';
 import ReelCard from '../../components/cards/ReelCard';
 import EmptyState from '../../components/common/EmptyState';
@@ -64,7 +65,7 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>Your saved content library</Text>
         </View>
         <TouchableOpacity style={styles.searchBtn} activeOpacity={0.8}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Search size={18} color={Colors.muted} />
         </TouchableOpacity>
       </View>
 
@@ -90,7 +91,7 @@ export default function HomeScreen() {
         <EmptyState
           title="No saved reels yet"
           message="Share your first reel to get started. Tap the + button below."
-          icon="📹"
+          icon={<Video size={40} color={Colors.purple} />}
         />
       ) : (
         <FlatList
@@ -104,7 +105,7 @@ export default function HomeScreen() {
       )}
 
       <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={handleAddManually}>
-        <Text style={styles.fabIcon}>+</Text>
+        <Plus size={28} color={Colors.text} />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -116,7 +117,6 @@ const styles = StyleSheet.create({
   title: { color: Colors.text, fontSize: 22, fontWeight: '700' },
   subtitle: { color: Colors.muted, fontSize: 12, marginTop: 2 },
   searchBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center' },
-  searchIcon: { fontSize: 18 },
   filtersScroll: { paddingHorizontal: 20, marginVertical: 12 },
   filtersContent: { gap: 10, paddingEnd: 20 },
   filterChip: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, backgroundColor: Colors.card, borderWidth: 1, borderColor: 'transparent' },
@@ -125,5 +125,4 @@ const styles = StyleSheet.create({
   filterTextActive: { color: Colors.text },
   listContent: { paddingHorizontal: 20, paddingVertical: 12 },
   fab: { position: 'absolute', bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.purple, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 12, elevation: 8 },
-  fabIcon: { color: Colors.text, fontSize: 28, fontWeight: '300' },
 });

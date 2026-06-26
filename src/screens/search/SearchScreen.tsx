@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { Search, X } from 'lucide-react-native';
 import { Colors } from '../../theme';
 import ReelCard from '../../components/cards/ReelCard';
 import EmptyState from '../../components/common/EmptyState';
@@ -98,7 +99,7 @@ export default function SearchScreen() {
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={handleClearSearch} style={styles.clearBtn} activeOpacity={0.8}>
-            <Text style={styles.clearText}>✕</Text>
+            <X size={16} color={Colors.muted} />
           </TouchableOpacity>
         )}
       </View>
@@ -110,10 +111,10 @@ export default function SearchScreen() {
       )}
 
       {filteredReels.length === 0 && searchQuery.length > 0 ? (
-        <EmptyState title="No results" message={`No content found matching "${searchQuery}".`} icon="🔍" />
+        <EmptyState title="No results" message={`No content found matching "${searchQuery}".`} icon={<Search size={40} color={Colors.purple} />} />
       ) : filteredReels.length === 0 ? (
         <View style={styles.emptySearchContainer}>
-          <Text style={styles.emptySearchIcon}>🔍</Text>
+          <Search size={48} color={Colors.purple} style={styles.emptySearchIcon} />
           <Text style={styles.emptySearchTitle}>Start searching</Text>
           <Text style={styles.emptySearchMessage}>Search by title, tags, or notes to find your saved content.</Text>
         </View>
@@ -147,12 +148,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#162033',
   },
-  clearBtn: { position: 'absolute', right: 12, top: '50%', marginTop: -10 },
-  clearText: { color: Colors.muted, fontSize: 18, fontWeight: '300' },
+  clearBtn: { position: 'absolute', right: 12, top: '50%', marginTop: -8 },
   resultInfo: { paddingHorizontal: 20, marginBottom: 12 },
   resultText: { color: Colors.muted, fontSize: 13 },
   emptySearchContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
-  emptySearchIcon: { fontSize: 48, marginBottom: 12 },
+  emptySearchIcon: { marginBottom: 12 },
   emptySearchTitle: { color: Colors.text, fontSize: 18, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
   emptySearchMessage: { color: Colors.muted, fontSize: 14, textAlign: 'center' },
   listContent: { paddingHorizontal: 20, paddingVertical: 12 },
