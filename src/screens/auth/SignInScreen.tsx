@@ -177,17 +177,6 @@ export default function SignInScreen({ onSignUpPress, onBackToRoot, onContinueAs
             </View>
 
             <TouchableOpacity
-              onPress={onBackToRoot}
-              activeOpacity={0.8}
-              style={styles.rootLink}
-              accessibilityRole="button"
-              accessibilityLabel="Back to screens"
-              accessibilityHint="Returns to the placeholder screen list"
-            >
-              <Text style={styles.rootLinkText}>Back to screens</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
               onPress={onContinueAsGuest ?? onBackToRoot}
               activeOpacity={0.8}
               style={styles.guestButton}
