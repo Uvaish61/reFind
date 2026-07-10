@@ -24,3 +24,11 @@ export interface Collection {
   itemCount: number;
   createdAt: string;
 }
+
+export interface SearchFilters {
+  platform: Platform | null;
+  collection: string | null;
+  tags: string[];
+  favoritesOnly: boolean;
+  sortBy: 'newest' | 'oldest' | 'title';
+}

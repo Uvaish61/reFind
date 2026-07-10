@@ -53,7 +53,7 @@ export default function UIRoot() {
   }
 
   if (screen === 'search') {
-    return <SearchScreen />;
+    return <SearchScreen navigate={setScreen} />;
   }
 
   if (screen === 'savePreview') {
