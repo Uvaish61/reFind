@@ -5,8 +5,19 @@ import OnboardingScreen from '../onboarding/OnboardingScreen';
 import SignInScreen from '../auth/SignInScreen';
 import SignupScreen from '../auth/SignupScreen';
 import HomeScreen from '../home/HomeScreen';
+import SearchScreen from '../search/SearchScreen';
+import SavePreviewScreen from '../savePreview/SavePreviewScreen';
 
-export type Screen = 'splash' | 'onboarding' | 'signin' | 'signup' | 'home';
+export type Screen =
+  | 'splash'
+  | 'onboarding'
+  | 'signin'
+  | 'signup'
+  | 'home'
+  | 'search'
+  | 'collections'
+  | 'savePreview'
+  | 'profile';
 
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
@@ -41,5 +52,13 @@ export default function UIRoot() {
     return <SignupScreen navigate={setScreen} />;
   }
 
-  return <HomeScreen />;
+  if (screen === 'search') {
+    return <SearchScreen />;
+  }
+
+  if (screen === 'savePreview') {
+    return <SavePreviewScreen onCancelPress={() => setScreen('home')} onSavePress={() => setScreen('home')} />;
+  }
+
+  return <HomeScreen navigate={setScreen} />;
 }

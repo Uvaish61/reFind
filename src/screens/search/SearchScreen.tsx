@@ -4,55 +4,71 @@ import { Search, X } from 'lucide-react-native';
 import { Colors } from '../../theme';
 import ReelCard from '../../components/cards/ReelCard';
 import EmptyState from '../../components/common/EmptyState';
+import { SavedItem } from '../../types';
 
-type Reel = {
-  id: string;
-  title: string;
-  thumbnail?: string;
-  platform: 'instagram' | 'youtube' | 'linkedin' | 'twitter' | 'link';
-  tags: string[];
-  collectionName?: string;
-  notes?: string;
-};
-
-const mockReels: Reel[] = [
+const mockReels: SavedItem[] = [
   {
     id: '1',
+    url: 'https://youtube.com/watch?v=1',
     title: 'How to master React hooks in 2024',
+    originalTitle: 'How to master React hooks in 2024',
     platform: 'youtube',
+    creator: 'CodeWithJS',
     tags: ['React', 'JavaScript'],
-    collectionName: 'Development',
+    collection: 'Development',
     notes: 'Great video on advanced hooks patterns',
+    isFavorite: true,
+    savedAt: new Date(Date.now() - 2 * 3600000).toISOString(),
   },
   {
     id: '2',
+    url: 'https://linkedin.com/posts/2',
     title: 'AI trends everyone should know about',
+    originalTitle: 'AI trends everyone should know about',
     platform: 'linkedin',
+    creator: 'TechInsights',
     tags: ['AI', 'Tech'],
-    collectionName: 'AI',
+    collection: 'AI',
     notes: 'Latest AI innovations in 2024',
+    isFavorite: false,
+    savedAt: new Date(Date.now() - 86400000).toISOString(),
   },
   {
     id: '3',
+    url: 'https://instagram.com/reel/3',
     title: 'Fitness routine for busy professionals',
+    originalTitle: 'Fitness routine for busy professionals',
     platform: 'instagram',
+    creator: 'FitLife',
     tags: ['Fitness', 'Health'],
     notes: '30-minute home workout',
+    isFavorite: false,
+    savedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
   },
   {
     id: '4',
+    url: 'https://x.com/careercoach/status/4',
     title: 'Job interview tips that actually work',
-    platform: 'twitter',
+    originalTitle: 'Job interview tips that actually work',
+    platform: 'x',
+    creator: 'CareerCoach',
     tags: ['Jobs', 'Career'],
     notes: 'FAANG interview preparation guide',
+    isFavorite: false,
+    savedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
   },
   {
     id: '5',
+    url: 'https://youtube.com/watch?v=5',
     title: 'TypeScript best practices',
+    originalTitle: 'TypeScript best practices',
     platform: 'youtube',
+    creator: 'DevTips',
     tags: ['TypeScript', 'JavaScript'],
-    collectionName: 'Development',
+    collection: 'Development',
     notes: 'Type safety and advanced types',
+    isFavorite: true,
+    savedAt: new Date(Date.now() - 30 * 60000).toISOString(),
   },
 ];
 
@@ -67,13 +83,13 @@ export default function SearchScreen() {
       const titleMatch = reel.title.toLowerCase().includes(query);
       const tagsMatch = reel.tags.some((tag) => tag.toLowerCase().includes(query));
       const notesMatch = reel.notes?.toLowerCase().includes(query);
-      const collectionMatch = reel.collectionName?.toLowerCase().includes(query);
+      const collectionMatch = reel.collection?.toLowerCase().includes(query);
 
       return titleMatch || tagsMatch || notesMatch || collectionMatch;
     });
   }, [searchQuery]);
 
-  const handleReelPress = (reel: Reel) => {
+  const handleReelPress = (reel: SavedItem) => {
     console.log('Open reel detail:', reel.id);
   };
 
@@ -121,7 +137,7 @@ export default function SearchScreen() {
       ) : (
         <FlatList
           data={filteredReels}
-          renderItem={({ item }) => <ReelCard {...item} onPress={() => handleReelPress(item)} />}
+          renderItem={({ item }) => <ReelCard item={item} onPress={() => handleReelPress(item)} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           scrollEnabled={false}

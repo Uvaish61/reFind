@@ -1,13 +1,26 @@
-export type Platform = 'instagram' | 'youtube' | 'twitter' | 'linkedin' | 'tiktok' | 'link';
+export type Platform = 'instagram' | 'youtube' | 'facebook' | 'x' | 'linkedin';
 
 export interface SavedItem {
   id: string;
   url: string;
-  title: string;
-  notes: string;
-  tags: string[];
+  title: string; // custom title (user-set)
+  originalTitle: string; // auto-extracted
   platform: Platform;
-  collectionName: string;
+  creator: string;
+  thumbnailUri?: string;
+  collection?: string;
+  tags: string[];
+  notes?: string;
+  isFavorite: boolean;
   savedAt: string; // ISO date string
-  thumbnail?: string;
+  viewedAt?: string;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  emoji: string;
+  isPinned: boolean;
+  itemCount: number;
+  createdAt: string;
 }

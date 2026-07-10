@@ -1,128 +1,215 @@
-import React, { useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
-import { Search, Plus, Video } from 'lucide-react-native';
-import { Colors } from '../../theme';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ScrollView, Animated, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Search, BookOpen } from 'lucide-react-native';
+import { Palette, Radius, Spacing } from '../../theme';
+import { SavedItem, Collection } from '../../types';
+import * as storage from '../../services/storage';
+import SectionHeader from '../../components/common/SectionHeader';
+import BottomNavBar, { Tab } from '../../components/common/BottomNavBar';
 import ReelCard from '../../components/cards/ReelCard';
-import EmptyState from '../../components/common/EmptyState';
+import CollectionChip from '../../components/cards/CollectionChip';
+import { Screen } from '../ui/UIRoot';
 
-type Reel = {
-  id: string;
-  title: string;
-  thumbnail?: string;
-  platform: 'instagram' | 'youtube' | 'linkedin' | 'twitter' | 'link';
-  tags: string[];
-  collectionName?: string;
+type Props = {
+  navigate: (screen: Screen) => void;
 };
 
-const mockReels: Reel[] = [
-  {
-    id: '1',
-    title: 'How to master React hooks in 2024',
-    platform: 'youtube',
-    tags: ['React', 'JavaScript'],
-    collectionName: 'Development',
-  },
-  {
-    id: '2',
-    title: 'AI trends everyone should know about',
-    platform: 'linkedin',
-    tags: ['AI', 'Tech'],
-    collectionName: 'AI',
-  },
-  {
-    id: '3',
-    title: 'Fitness routine for busy professionals',
-    platform: 'instagram',
-    tags: ['Fitness', 'Health'],
-  },
-  {
-    id: '4',
-    title: 'Job interview tips that actually work',
-    platform: 'twitter',
-    tags: ['Jobs', 'Career'],
-  },
-];
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
 
-const filters = ['All', 'AI', 'Tech', 'Jobs', 'Fitness'];
+function SkeletonCard() {
+  const shimmer = useRef(new Animated.Value(0)).current;
 
-export default function HomeScreen() {
-  const [activeFilter, setActiveFilter] = useState('All');
-  const [reels] = useState<Reel[]>(mockReels);
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 0, duration: 700, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [shimmer]);
 
-  const handleReelPress = (reel: Reel) => {
-    console.log('Open reel detail:', reel.id);
-  };
+  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.4, 0.9] });
 
-  const handleAddManually = () => {
-    console.log('Open add link manually screen');
+  return (
+    <Animated.View style={[styles.card, styles.skeletonCard, { opacity }]}>
+      <View style={styles.skeletonThumb} />
+      <View style={styles.skeletonInfo}>
+        <View style={[styles.skeletonLine, { width: '70%' }]} />
+        <View style={[styles.skeletonLine, { width: '45%', height: 8, marginTop: 8 }]} />
+      </View>
+    </Animated.View>
+  );
+}
+
+function EmptyState() {
+  return (
+    <View style={styles.emptyState}>
+      <BookOpen size={40} color={Palette.textDisabled} />
+      <Text style={styles.emptyTitle}>Nothing saved yet</Text>
+      <Text style={styles.emptyMessage}>Tap + to save your first link</Text>
+    </View>
+  );
+}
+
+export default function HomeScreen({ navigate }: Props) {
+  const [recentItems, setRecentItems] = useState<SavedItem[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userName] = useState('Uvaish');
+
+  useEffect(() => {
+    const load = async () => {
+      const items = await storage.getAllItems();
+      const sorted = items.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
+      setRecentItems(sorted.slice(0, 10));
+      const allCollections = await storage.getAllCollections();
+      setCollections(allCollections);
+      setIsLoading(false);
+    };
+    load();
+  }, []);
+
+  const pinnedCollections = collections.filter((c) => c.isPinned);
+
+  const handleTabPress = (tab: Tab) => {
+    if (tab === 'home') navigate('home');
+    else if (tab === 'search') navigate('search');
+    else if (tab === 'add') navigate('savePreview');
+    else if (tab === 'library') navigate('collections');
+    else if (tab === 'profile') navigate('profile');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>reFind</Text>
-          <Text style={styles.subtitle}>Your saved content library</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="light-content" backgroundColor={Palette.bg} />
+      <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>{getGreeting()}</Text>
+            <Text style={styles.helloName}>Hello, {userName}</Text>
+          </View>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{userName.charAt(0).toUpperCase()}</Text>
+          </View>
         </View>
-        <TouchableOpacity style={styles.searchBtn} activeOpacity={0.8}>
-          <Search size={18} color={Colors.muted} />
-        </TouchableOpacity>
-      </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filtersContent}
-        style={styles.filtersScroll}
-      >
-        {filters.map((filter) => (
-          <TouchableOpacity
-            key={filter}
-            onPress={() => setActiveFilter(filter)}
-            style={[styles.filterChip, activeFilter === filter && styles.filterChipActive]}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.filterText, activeFilter === filter && styles.filterTextActive]}>{filter}</Text>
+        <View style={styles.searchSection}>
+          <TouchableOpacity style={styles.searchBar} activeOpacity={0.8} onPress={() => navigate('search')}>
+            <Search size={16} color={Palette.textDisabled} />
+            <Text style={styles.searchPlaceholder}>Search your library...</Text>
           </TouchableOpacity>
-        ))}
+        </View>
+
+        <View style={styles.recentSection}>
+          <SectionHeader title="Recent saves" onSeeAll={() => navigate('search')} />
+          {isLoading ? (
+            <View style={styles.listContent}>
+              <SkeletonCard />
+              <View style={styles.separator} />
+              <SkeletonCard />
+              <View style={styles.separator} />
+              <SkeletonCard />
+            </View>
+          ) : (
+            <FlatList
+              data={recentItems}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <ReelCard item={item} onPress={() => {}} />}
+              scrollEnabled={false}
+              contentContainerStyle={styles.listContent}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ListEmptyComponent={<EmptyState />}
+            />
+          )}
+        </View>
+
+        <View style={styles.collectionsSection}>
+          <SectionHeader title="Collections" onSeeAll={() => navigate('collections')} />
+          <FlatList
+            data={pinnedCollections}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.collectionsListContent}
+            renderItem={({ item }) => <CollectionChip collection={item} onPress={() => {}} />}
+          />
+        </View>
       </ScrollView>
-
-      {reels.length === 0 ? (
-        <EmptyState
-          title="No saved reels yet"
-          message="Share your first reel to get started. Tap the + button below."
-          icon={<Video size={40} color={Colors.purple} />}
-        />
-      ) : (
-        <FlatList
-          data={reels}
-          renderItem={({ item }) => <ReelCard {...item} onPress={() => handleReelPress(item)} />}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          scrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-
-      <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={handleAddManually}>
-        <Plus size={28} color={Colors.text} />
-      </TouchableOpacity>
+      <BottomNavBar activeTab="home" onTabPress={handleTabPress} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14 },
-  title: { color: Colors.text, fontSize: 22, fontWeight: '700' },
-  subtitle: { color: Colors.muted, fontSize: 12, marginTop: 2 },
-  searchBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center' },
-  filtersScroll: { paddingHorizontal: 20, marginVertical: 12 },
-  filtersContent: { gap: 10, paddingEnd: 20 },
-  filterChip: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, backgroundColor: Colors.card, borderWidth: 1, borderColor: 'transparent' },
-  filterChipActive: { backgroundColor: Colors.purple, borderColor: Colors.purple },
-  filterText: { color: Colors.muted, fontWeight: '600', fontSize: 13 },
-  filterTextActive: { color: Colors.text },
-  listContent: { paddingHorizontal: 20, paddingVertical: 12 },
-  fab: { position: 'absolute', bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.purple, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 12, elevation: 8 },
+  container: { flex: 1, backgroundColor: Palette.bg },
+  flex: { flex: 1 },
+  scrollContent: { paddingBottom: 100 },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.sm,
+    marginBottom: Spacing.xl,
+  },
+  greeting: { fontFamily: 'DMSans-Regular', fontSize: 12, color: Palette.textMuted, marginBottom: 2 },
+  helloName: { fontFamily: 'DMSerifDisplay-Italic', fontSize: 36, color: Palette.textPrimary, lineHeight: 42 },
+  avatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Palette.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  avatarText: { fontFamily: 'DMSans-Bold', fontSize: 16, color: '#0C0C0C' },
+
+  searchSection: { paddingHorizontal: Spacing.xl, marginBottom: Spacing.xxl - 4 },
+  searchBar: {
+    backgroundColor: Palette.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  searchPlaceholder: { fontFamily: 'DMSans-Regular', fontSize: 14, color: Palette.textDisabled },
+
+  recentSection: {},
+  listContent: { paddingHorizontal: Spacing.xl },
+  separator: { height: 10 },
+
+  card: {
+    backgroundColor: Palette.card,
+    borderRadius: Radius.xl,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    padding: 14,
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  skeletonCard: {},
+  skeletonThumb: { width: 62, height: 62, borderRadius: Radius.md, backgroundColor: '#1e1e1e' },
+  skeletonInfo: { flex: 1, justifyContent: 'center' },
+  skeletonLine: { height: 10, borderRadius: 5, backgroundColor: '#1e1e1e' },
+
+  emptyState: { alignItems: 'center', paddingVertical: 60 },
+  emptyTitle: { fontFamily: 'DMSerifDisplay-Italic', fontSize: 22, color: Palette.textPrimary, marginTop: 16 },
+  emptyMessage: { fontFamily: 'DMSans-Regular', fontSize: 14, color: Palette.textMuted, marginTop: 6 },
+
+  collectionsSection: { marginTop: 28 },
+  collectionsListContent: { paddingHorizontal: Spacing.xl, gap: 10 },
 });
