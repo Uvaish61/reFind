@@ -6,7 +6,7 @@ import SignInScreen from '../auth/SignInScreen';
 import SignupScreen from '../auth/SignupScreen';
 import HomeScreen from '../home/HomeScreen';
 
-type Screen = 'splash' | 'onboarding' | 'signin' | 'signup' | 'home';
+export type Screen = 'splash' | 'onboarding' | 'signin' | 'signup' | 'home';
 
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
@@ -34,23 +34,11 @@ export default function UIRoot() {
   }
 
   if (screen === 'signin') {
-    return (
-      <SignInScreen
-        onSignUpPress={() => setScreen('signup')}
-        onContinueAsGuest={() => setScreen('home')}
-        onBackToRoot={() => setScreen('signin')}
-      />
-    );
+    return <SignInScreen navigate={setScreen} />;
   }
 
   if (screen === 'signup') {
-    return (
-      <SignupScreen
-        onSignInPress={() => setScreen('signin')}
-        onContinueAsGuest={() => setScreen('home')}
-        onBackToRoot={() => setScreen('signin')}
-      />
-    );
+    return <SignupScreen navigate={setScreen} />;
   }
 
   return <HomeScreen />;

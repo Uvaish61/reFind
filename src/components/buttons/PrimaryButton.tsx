@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
 import { Palette, Typography, Radius } from '../../theme';
 
 type Props = {
@@ -7,12 +7,13 @@ type Props = {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'solid' | 'outline';
+  variant?: 'solid' | 'ghost';
+  icon?: React.ReactNode;
   style?: ViewStyle;
 };
 
-export default function PrimaryButton({ label, onPress, disabled, loading, variant = 'solid', style }: Props) {
-  const isOutline = variant === 'outline';
+export default function PrimaryButton({ label, onPress, disabled, loading, variant = 'solid', icon, style }: Props) {
+  const isGhost = variant === 'ghost';
 
   return (
     <TouchableOpacity
@@ -21,15 +22,18 @@ export default function PrimaryButton({ label, onPress, disabled, loading, varia
       disabled={disabled || loading}
       style={[
         styles.button,
-        isOutline ? styles.outline : styles.solid,
+        isGhost ? styles.ghost : styles.solid,
         (disabled || loading) && styles.disabled,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isOutline ? Palette.textPrimary : '#0C0C0C'} />
+        <ActivityIndicator color={isGhost ? Palette.textPrimary : '#0C0C0C'} size="small" />
       ) : (
-        <Text style={isOutline ? styles.outlineText : styles.solidText}>{label}</Text>
+        <View style={styles.content}>
+          {icon}
+          <Text style={isGhost ? styles.ghostText : styles.solidText}>{label}</Text>
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -43,9 +47,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
   },
+  content: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   solid: { backgroundColor: Palette.accent },
-  outline: { backgroundColor: Palette.card, borderWidth: 1, borderColor: Palette.border },
+  ghost: { backgroundColor: Palette.card, borderWidth: 1, borderColor: Palette.border },
   disabled: { opacity: 0.4 },
   solidText: { ...Typography.buttonLG },
-  outlineText: { ...Typography.buttonLG, color: Palette.textPrimary },
+  ghostText: { fontFamily: 'DMSans-Medium', fontSize: 14, color: 'rgba(242, 237, 228, 0.7)' },
 });
