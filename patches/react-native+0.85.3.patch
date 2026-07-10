@@ -1,0 +1,31 @@
+diff --git a/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake b/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake
+index 0000000..0000000 100644
+--- a/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake
++++ b/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake
+@@ -34,7 +34,7 @@
+ # If the user toolchain supports IPO, we enable it for the app build
+ include(CheckIPOSupported)
+ check_ipo_supported(RESULT IPO_SUPPORT)
+-if (IPO_SUPPORT)
++if (IPO_SUPPORT AND NOT CMAKE_HOST_WIN32)
+   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+ endif()
+
+@@ -83,10 +83,17 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
+         reactnative                         # prefab ready
+ )
+
++if (CMAKE_HOST_WIN32)
++  target_link_libraries(${CMAKE_PROJECT_NAME} c++_shared)
++endif()
++
+ # We use an interface target to propagate flags to all the generated targets
+ # such as the folly flags or others.
+ add_library(common_flags INTERFACE)
+ target_compile_options(common_flags INTERFACE ${folly_FLAGS})
++if (CMAKE_HOST_WIN32)
++  target_link_libraries(common_flags INTERFACE c++_shared)
++endif()
+
+ # If project is on RN CLI v9, then we can use the following lines to link against the autolinked 3rd party libraries.
+ if(EXISTS ${PROJECT_BUILD_DIR}/generated/autolinking/src/main/jni/Android-autolinking.cmake)

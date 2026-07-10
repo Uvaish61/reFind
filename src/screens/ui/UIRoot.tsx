@@ -10,6 +10,8 @@ import SavePreviewScreen from '../savePreview/SavePreviewScreen';
 import SaveSuccessScreen from '../savePreview/SaveSuccessScreen';
 import LibraryScreen from '../library/LibraryScreen';
 import CollectionDetailScreen from '../library/CollectionDetailScreen';
+import ProfileScreen from '../profile/ProfileScreen';
+import StatisticsScreen from '../statistics/StatisticsScreen';
 import { Collection, SavedItem } from '../../types';
 
 export type Screen =
@@ -23,7 +25,8 @@ export type Screen =
   | 'collectionDetail'
   | 'savePreview'
   | 'saveSuccess'
-  | 'profile';
+  | 'profile'
+  | 'statistics';
 
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
@@ -94,6 +97,14 @@ export default function UIRoot() {
 
   if (screen === 'collectionDetail' && selectedCollection) {
     return <CollectionDetailScreen collection={selectedCollection} navigate={setScreen} />;
+  }
+
+  if (screen === 'profile') {
+    return <ProfileScreen navigate={setScreen} />;
+  }
+
+  if (screen === 'statistics') {
+    return <StatisticsScreen navigate={setScreen} onBack={() => setScreen('profile')} />;
   }
 
   return <HomeScreen navigate={setScreen} />;
