@@ -83,7 +83,7 @@ export default function HomeScreen({ navigate }: Props) {
     if (tab === 'home') navigate('home');
     else if (tab === 'search') navigate('search');
     else if (tab === 'add') navigate('savePreview');
-    else if (tab === 'library') navigate('collections');
+    else if (tab === 'library') navigate('library');
     else if (tab === 'profile') navigate('profile');
   };
 
@@ -132,7 +132,7 @@ export default function HomeScreen({ navigate }: Props) {
         </View>
 
         <View style={styles.collectionsSection}>
-          <SectionHeader title="Collections" onSeeAll={() => navigate('collections')} />
+          <SectionHeader title="Collections" onSeeAll={() => navigate('library')} />
           <FlatList
             data={pinnedCollections}
             horizontal

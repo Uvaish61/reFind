@@ -146,7 +146,7 @@ export default function SearchScreen({ navigate, initialQuery }: Props) {
     if (tab === 'home') navigate('home');
     else if (tab === 'search') navigate('search');
     else if (tab === 'add') navigate('savePreview');
-    else if (tab === 'library') navigate('collections');
+    else if (tab === 'library') navigate('library');
     else if (tab === 'profile') navigate('profile');
   };
 

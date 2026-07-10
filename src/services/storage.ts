@@ -55,3 +55,8 @@ export async function updateCollection(updated: Collection): Promise<void> {
     await AsyncStorage.setItem(COLLECTIONS_KEY, JSON.stringify(collections));
   }
 }
+
+export async function getItemCountForCollection(collectionName: string): Promise<number> {
+  const items = await getAllItems();
+  return items.filter(i => i.collection === collectionName).length;
+}

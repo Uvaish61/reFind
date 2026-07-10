@@ -7,6 +7,9 @@ import SignupScreen from '../auth/SignupScreen';
 import HomeScreen from '../home/HomeScreen';
 import SearchScreen from '../search/SearchScreen';
 import SavePreviewScreen from '../savePreview/SavePreviewScreen';
+import LibraryScreen from '../library/LibraryScreen';
+import CollectionDetailScreen from '../library/CollectionDetailScreen';
+import { Collection } from '../../types';
 
 export type Screen =
   | 'splash'
@@ -15,7 +18,8 @@ export type Screen =
   | 'signup'
   | 'home'
   | 'search'
-  | 'collections'
+  | 'library'
+  | 'collectionDetail'
   | 'savePreview'
   | 'profile';
 
@@ -23,6 +27,7 @@ const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
 export default function UIRoot() {
   const [screen, setScreen] = useState<Screen>('splash');
+  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const onboardingComplete = useRef(false);
 
   useEffect(() => {
@@ -58,6 +63,22 @@ export default function UIRoot() {
 
   if (screen === 'savePreview') {
     return <SavePreviewScreen onCancelPress={() => setScreen('home')} onSavePress={() => setScreen('home')} />;
+  }
+
+  if (screen === 'library') {
+    return (
+      <LibraryScreen
+        navigate={setScreen}
+        onOpenCollection={(collection) => {
+          setSelectedCollection(collection);
+          setScreen('collectionDetail');
+        }}
+      />
+    );
+  }
+
+  if (screen === 'collectionDetail' && selectedCollection) {
+    return <CollectionDetailScreen collection={selectedCollection} navigate={setScreen} />;
   }
 
   return <HomeScreen navigate={setScreen} />;
