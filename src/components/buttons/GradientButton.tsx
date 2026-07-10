@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   gradientFill: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   gradientFallback: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#7C3AED',
     opacity: 0.95,
   } as ViewStyle,

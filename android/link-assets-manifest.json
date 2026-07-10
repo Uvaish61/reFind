@@ -1,0 +1,29 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/DMSans-Bold.ttf",
+      "sha1": "34d3481d2079dfc5feacfeeed92bff9173595761"
+    },
+    {
+      "path": "assets/fonts/DMSans-Medium.ttf",
+      "sha1": "83d45e11af5ab26f4645c936c1066edd683a08a0"
+    },
+    {
+      "path": "assets/fonts/DMSans-Regular.ttf",
+      "sha1": "2a2625e1f9a6a76ebbf0f4dcdfbd634ca7905e81"
+    },
+    {
+      "path": "assets/fonts/DMSans-SemiBold.ttf",
+      "sha1": "55cf45f306127e079cd60688e9dcd9ea49efc00e"
+    },
+    {
+      "path": "assets/fonts/DMSerifDisplay-Italic.ttf",
+      "sha1": "da06fca1dd72d6648204461164d0bc2faefa72c8"
+    },
+    {
+      "path": "assets/fonts/DMSerifDisplay-Regular.ttf",
+      "sha1": "5800e011c521d509e460f08dffbaa452ab22992d"
+    }
+  ]
+}

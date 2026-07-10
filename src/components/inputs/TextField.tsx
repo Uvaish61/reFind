@@ -1,35 +1,55 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
-import { Colors } from '../../theme';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardTypeOptions } from 'react-native';
+import { Palette, Typography, Radius, Spacing } from '../../theme';
 
 type Props = {
-  label?: string;
+  label: string;
+  value: string;
+  onChangeText: (t: string) => void;
   placeholder?: string;
-  value?: string;
-  onChangeText?: (t: string) => void;
-  secure?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad' | 'number-pad' | 'decimal-pad' | 'url';
+  secureTextEntry?: boolean;
+  keyboardType?: KeyboardTypeOptions;
+  autoFocus?: boolean;
   error?: string;
 };
 
-export default function TextField({ label, placeholder, value, onChangeText, secure, keyboardType = 'default', error }: Props) {
-  const [hidden, setHidden] = useState(!!secure);
+export default function TextField({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  secureTextEntry,
+  keyboardType = 'default',
+  autoFocus,
+  error,
+}: Props) {
+  const [hidden, setHidden] = useState(!!secureTextEntry);
+  const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.container}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-      <View style={[styles.inputRow, error ? styles.inputRowError : null]}>
+      <Text style={styles.label}>{label}</Text>
+      <View
+        style={[
+          styles.inputRow,
+          focused && styles.inputRowFocused,
+          error ? styles.inputRowError : null,
+        ]}
+      >
         <TextInput
           placeholder={placeholder}
-          placeholderTextColor={Colors.muted}
+          placeholderTextColor={Palette.textMuted}
           value={value}
           onChangeText={onChangeText}
           secureTextEntry={hidden}
           keyboardType={keyboardType}
+          autoFocus={autoFocus}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           style={styles.input}
           autoCapitalize="none"
         />
-        {secure ? (
+        {secureTextEntry ? (
           <TouchableOpacity onPress={() => setHidden(!hidden)} style={styles.eyeBtn}>
             <Text style={styles.eyeText}>{hidden ? 'Show' : 'Hide'}</Text>
           </TouchableOpacity>
@@ -41,20 +61,22 @@ export default function TextField({ label, placeholder, value, onChangeText, sec
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 12 },
-  label: { color: Colors.muted, fontSize: 13, marginBottom: 6 },
+  container: { marginBottom: Spacing.md },
+  label: { ...Typography.labelSM, color: Palette.textMuted, marginBottom: Spacing.sm },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.inputBg,
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    backgroundColor: Palette.input,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
-  inputRowError: { borderColor: Colors.error },
-  input: { flex: 1, color: Colors.text, paddingVertical: 14, fontSize: 15 },
-  eyeBtn: { paddingHorizontal: 8, paddingVertical: 8 },
-  eyeText: { color: Colors.muted, fontSize: 13 },
-  errorText: { color: Colors.error, marginTop: 5, fontSize: 12 },
+  inputRowFocused: { borderColor: Palette.borderAccent },
+  inputRowError: { borderColor: Palette.danger },
+  input: { flex: 1, ...Typography.bodyMD, padding: 0 },
+  eyeBtn: { paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xs },
+  eyeText: { ...Typography.bodySM },
+  errorText: { color: Palette.danger, marginTop: 5, fontSize: 12 },
 });

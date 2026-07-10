@@ -1,198 +1,325 @@
-import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Dimensions,
-  Animated,
-} from 'react-native';
-import { Bookmark, Tag, Search } from 'lucide-react-native';
-import { Colors } from '../../theme';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Instagram, Youtube, Linkedin, Facebook, Search, ChevronDown } from 'lucide-react-native';
+import { Palette, Typography, Radius, Spacing } from '../../theme';
+import Logo from '../../components/common/Logo';
+import PrimaryButton from '../../components/buttons/PrimaryButton';
+import OnboardingDots from '../../components/common/OnboardingDots';
+import GradientBox from '../../components/common/GradientBox';
 
-const { width } = Dimensions.get('window');
-
-const slides = [
-  {
-    id: '1',
-    Icon: Bookmark,
-    title: 'Save anything,\nnever lose it again.',
-    description: 'Save reels, tweets, links, articles, and anything you find online.',
-  },
-  {
-    id: '2',
-    Icon: Tag,
-    title: 'Organize\nwith tags & notes.',
-    description: 'Add tags, notes and collections to keep everything structured.',
-  },
-  {
-    id: '3',
-    Icon: Search,
-    title: 'Find it instantly,\nwhenever you need.',
-    description: 'Powerful search helps you find anything in seconds.',
-  },
-];
+const TOTAL_SLIDES = 3;
 
 type Props = {
-  onFinish: () => void;
+  onGetStarted: () => void;
+  onSignInPress: () => void;
 };
 
-export default function OnboardingScreen({ onFinish }: Props) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  const goToNext = () => {
-    if (activeIndex < slides.length - 1) {
-      const next = activeIndex + 1;
-      Animated.sequence([
-        Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-        Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
-      ]).start();
-      flatListRef.current?.scrollToIndex({ index: next, animated: true });
-      setActiveIndex(next);
-    } else {
-      onFinish();
-    }
-  };
-
-  const isLast = activeIndex === slides.length - 1;
+export default function OnboardingScreen({ onGetStarted, onSignInPress }: Props) {
+  const [slide, setSlide] = useState(0);
+  const goNext = () => setSlide((s) => Math.min(s + 1, TOTAL_SLIDES - 1));
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.skipBtn} onPress={onFinish} activeOpacity={0.7}>
-        <Text style={styles.skipText}>Skip</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {slide === 0 && <WelcomeSlide onGetStarted={goNext} onSignInPress={onSignInPress} />}
+      {slide === 1 && <SaveSlide onNext={goNext} />}
+      {slide === 2 && <FindSlide onGetStarted={onGetStarted} />}
+    </SafeAreaView>
+  );
+}
 
-      <FlatList
-        ref={flatListRef}
-        data={slides}
-        horizontal
-        pagingEnabled
-        scrollEnabled={false}
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Animated.View style={[styles.slide, { opacity: fadeAnim }]}>
-            <View style={styles.illustrationBox}>
-              <View style={styles.iconCircle}>
-                <item.Icon size={64} color={Colors.text} strokeWidth={1.5} />
-              </View>
-              <View style={styles.orb1} />
-              <View style={styles.orb2} />
-            </View>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
-          </Animated.View>
-        )}
-      />
-
-      <View style={styles.dotsRow}>
-        {slides.map((_, i) => (
-          <View key={i} style={[styles.dot, i === activeIndex && styles.dotActive]} />
-        ))}
+function WelcomeSlide({ onGetStarted, onSignInPress }: { onGetStarted: () => void; onSignInPress: () => void }) {
+  return (
+    <View style={styles.welcomeSlide}>
+      <View style={styles.topSection}>
+        <Logo />
+        <Text style={styles.tagline}>Save. Organize. Rediscover.</Text>
       </View>
 
-      <TouchableOpacity style={styles.nextBtn} onPress={goToNext} activeOpacity={0.85}>
-        <Text style={styles.nextText}>{isLast ? 'Get Started' : 'Next'}</Text>
-      </TouchableOpacity>
+      <View style={styles.illustrationCard}>
+        <PreviewRow colors={['#1a1a00', '#8aaa00']} />
+        <PreviewRow colors={['#001a28', '#0077b6']} accentBorder />
+        <PreviewRow colors={['#1a0028', '#6b21a8']} />
+      </View>
+
+      <View style={styles.bottomSection}>
+        <PrimaryButton label="Get Started" onPress={onGetStarted} />
+        <View style={styles.footerRow}>
+          <Text style={styles.footerText}>Already have an account? </Text>
+          <TouchableOpacity onPress={onSignInPress} activeOpacity={0.8}>
+            <Text style={styles.footerLink}>Sign in</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function SaveSlide({ onNext }: { onNext: () => void }) {
+  const pulse = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.4, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+
+  return (
+    <View style={styles.standardSlide}>
+      <View style={styles.illustrationCardFlex}>
+        <View style={styles.shareBadge}>
+          <Text style={styles.shareBadgeText}>SHARE INTENT</Text>
+        </View>
+
+        <View style={styles.platformRow}>
+          <GradientBox colors={['#833ab4', '#fd1d1d', '#fcb045']} width={44} height={44} borderRadius={12}>
+            <Instagram size={20} color="#fff" />
+          </GradientBox>
+          <View style={[styles.platformIcon, { backgroundColor: '#ff0000' }]}>
+            <Youtube size={20} color="#fff" />
+          </View>
+          <View style={[styles.platformIcon, { backgroundColor: '#0077b5' }]}>
+            <Linkedin size={20} color="#fff" />
+          </View>
+          <View style={[styles.platformIcon, { backgroundColor: '#1877f2' }]}>
+            <Facebook size={20} color="#fff" />
+          </View>
+        </View>
+
+        <Animated.View style={[styles.arrowWrap, { opacity: pulse }]}>
+          <View style={styles.arrowLine} />
+          <ChevronDown size={18} color={Palette.accentDim} />
+        </Animated.View>
+
+        <View style={styles.logoIconSmall}>
+          <Text style={styles.logoIconSmallText}>R</Text>
+        </View>
+
+        <View style={styles.savedBadge}>
+          <Text style={styles.savedBadgeText}>Saved to Refind ✓</Text>
+        </View>
+      </View>
+
+      <View style={styles.textSection}>
+        <Text style={styles.heading}>Save from anywhere.</Text>
+        <Text style={styles.body}>
+          Share any Reel, Short, post or article directly to Refind — no more copy-pasting links.
+        </Text>
+
+        <View style={styles.progressRow}>
+          <OnboardingDots total={TOTAL_SLIDES} current={1} />
+          <TouchableOpacity style={styles.nextBtn} onPress={onNext} activeOpacity={0.85}>
+            <Text style={styles.nextBtnText}>Next →</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function FindSlide({ onGetStarted }: { onGetStarted: () => void }) {
+  return (
+    <View style={styles.standardSlide}>
+      <View style={styles.illustrationCardFlex}>
+        <View style={styles.searchBarMock}>
+          <Search size={14} color={Palette.accent} />
+          <Text style={styles.searchBarText}>react hooks</Text>
+          <View style={styles.blinkCursor} />
+        </View>
+
+        <ResultRow colors={['#1a1a00', '#8aaa00']} accentBorder />
+        <ResultRow colors={['#001a28', '#0077b6']} />
+        <ResultRow colors={['#1a0028', '#6b21a8']} />
+
+        <View style={styles.tagRow}>
+          <View style={[styles.tagChip, styles.tagChipActive]}>
+            <Text style={styles.tagChipActiveText}>#React</Text>
+          </View>
+          <View style={styles.tagChip}>
+            <Text style={styles.tagChipText}>YouTube</Text>
+          </View>
+          <View style={styles.tagChip}>
+            <Text style={styles.tagChipText}>Learn React</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.textSection}>
+        <Text style={styles.heading}>Find it instantly.</Text>
+        <Text style={styles.body}>
+          Search across titles, tags, notes, collections and creators — all in one place.
+        </Text>
+
+        <View style={styles.progressRow}>
+          <OnboardingDots total={TOTAL_SLIDES} current={2} />
+          <TouchableOpacity style={styles.nextBtn} onPress={onGetStarted} activeOpacity={0.85}>
+            <Text style={styles.nextBtnText}>Get Started</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function PreviewRow({ colors, accentBorder }: { colors: string[]; accentBorder?: boolean }) {
+  return (
+    <View style={styles.previewRow}>
+      <GradientBox colors={colors} width={32} height={32} borderRadius={8} style={accentBorder ? styles.thumbAccentBorder : undefined} />
+      <View style={styles.previewLines}>
+        <View style={styles.skeletonLine} />
+        <View style={[styles.skeletonLine, styles.skeletonLineShort]} />
+      </View>
+    </View>
+  );
+}
+
+function ResultRow({ colors, accentBorder }: { colors: string[]; accentBorder?: boolean }) {
+  return (
+    <View style={styles.previewRow}>
+      <GradientBox colors={colors} width={36} height={36} borderRadius={8} style={accentBorder ? styles.thumbAccentBorder : undefined} />
+      <View style={styles.previewLines}>
+        <View style={styles.skeletonLine} />
+        <View style={[styles.skeletonLine, styles.skeletonLineShort]} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background, alignItems: 'center' },
+  container: { flex: 1, backgroundColor: Palette.bg },
 
-  skipBtn: { position: 'absolute', top: 16, right: 24, zIndex: 10, paddingVertical: 8, paddingHorizontal: 12 },
-  skipText: { color: Colors.muted, fontSize: 14, fontWeight: '600' },
+  // Slide 0 — Welcome
+  welcomeSlide: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
+    paddingTop: 40,
+    paddingBottom: 48,
+  },
+  topSection: { alignItems: 'center' },
+  tagline: { ...Typography.bodySM, marginTop: Spacing.sm },
 
-  slide: { width, flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
+  illustrationCard: {
+    backgroundColor: Palette.card,
+    borderRadius: Radius.xxl,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    height: 240,
+    padding: Spacing.lg,
+    justifyContent: 'center',
+    gap: Spacing.md,
+  },
+  previewRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  thumbAccentBorder: { borderWidth: 1, borderColor: Palette.borderAccent },
+  previewLines: { flex: 1, gap: 6 },
+  skeletonLine: { height: 8, borderRadius: 4, backgroundColor: Palette.border, width: '100%' },
+  skeletonLineShort: { width: '60%' },
 
-  illustrationBox: {
-    width: 220,
-    height: 220,
+  bottomSection: { gap: Spacing.md },
+  footerRow: { flexDirection: 'row', justifyContent: 'center' },
+  footerText: { ...Typography.bodySM },
+  footerLink: { ...Typography.bodySM, color: Palette.accent, fontFamily: 'DMSans-SemiBold' },
+
+  // Slides 1 & 2 — shared layout
+  standardSlide: {
+    flex: 1,
+    paddingHorizontal: 28,
+    paddingTop: 32,
+    paddingBottom: 48,
+    gap: Spacing.xxxl,
+  },
+  illustrationCardFlex: {
+    flex: 1,
+    backgroundColor: Palette.card,
+    borderRadius: Radius.xxl,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 48,
+    gap: Spacing.lg,
+    position: 'relative',
   },
-  iconCircle: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: Colors.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: Colors.purple,
-    shadowOpacity: 0.5,
-    shadowRadius: 30,
-    elevation: 12,
-  },
-  orb1: {
+
+  // Slide 1 — Save from anywhere
+  shareBadge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: Spacing.lg,
+    right: Spacing.lg,
+    backgroundColor: Palette.accentDim,
+    borderWidth: 1,
+    borderColor: Palette.borderAccent,
+    borderRadius: Radius.sm,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  shareBadgeText: { ...Typography.labelSM, color: Palette.accent, letterSpacing: 0.5 },
+  platformRow: { flexDirection: 'row', gap: Spacing.md },
+  platformIcon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: '#A78BFA',
-    opacity: 0.5,
-  },
-  orb2: {
-    position: 'absolute',
-    bottom: 16,
-    left: 12,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#6D28D9',
-    opacity: 0.6,
-  },
-
-  title: {
-    color: Colors.text,
-    fontSize: 26,
-    fontWeight: '800',
-    textAlign: 'center',
-    lineHeight: 34,
-    marginBottom: 16,
-  },
-  description: {
-    color: Colors.muted,
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 280,
-  },
-
-  dotsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 24,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#1E293B',
-  },
-  dotActive: {
-    width: 24,
-    backgroundColor: Colors.purple,
-    borderRadius: 4,
-  },
-
-  nextBtn: {
-    width: width - 48,
-    paddingVertical: 16,
-    borderRadius: 14,
-    backgroundColor: Colors.purple,
+    borderRadius: Radius.md,
     alignItems: 'center',
-    marginBottom: 40,
-    shadowColor: Colors.purple,
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    justifyContent: 'center',
   },
-  nextText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
+  arrowWrap: { alignItems: 'center' },
+  arrowLine: { width: 1, height: 32, backgroundColor: Palette.accentDim },
+  logoIconSmall: {
+    width: 52,
+    height: 52,
+    borderRadius: Radius.xl,
+    backgroundColor: Palette.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoIconSmallText: { fontFamily: 'DMSerifDisplay-Italic', fontSize: 24, color: '#0C0C0C' },
+  savedBadge: {
+    backgroundColor: '#1e1e1e',
+    borderWidth: 1,
+    borderColor: Palette.borderAccent,
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+  },
+  savedBadgeText: { ...Typography.labelSM, color: Palette.accent, textTransform: 'none' },
+
+  // Slide 2 — Find instantly
+  searchBarMock: {
+    position: 'absolute',
+    top: Spacing.lg,
+    left: Spacing.lg,
+    right: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Palette.bg,
+    borderWidth: 1,
+    borderColor: Palette.borderAccent,
+    borderRadius: Radius.md,
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.lg,
+  },
+  searchBarText: { ...Typography.bodyMD, flex: 1 },
+  blinkCursor: { width: 2, height: 14, backgroundColor: Palette.accent },
+  tagRow: { flexDirection: 'row', gap: Spacing.sm, position: 'absolute', bottom: Spacing.lg, left: Spacing.lg, right: Spacing.lg },
+  tagChip: { backgroundColor: Palette.card, borderRadius: Radius.xxl, paddingVertical: 6, paddingHorizontal: 12 },
+  tagChipActive: { backgroundColor: Palette.accentDim },
+  tagChipText: { ...Typography.caption },
+  tagChipActiveText: { ...Typography.caption, color: Palette.accent },
+
+  // Slide 1 & 2 shared bottom text/progress
+  textSection: { gap: Spacing.md },
+  heading: { ...Typography.displayLG },
+  body: { ...Typography.bodyMD, color: Palette.textMuted },
+  progressRow: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm },
+  nextBtn: {
+    marginLeft: 'auto',
+    backgroundColor: Palette.accent,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 10,
+  },
+  nextBtnText: { ...Typography.buttonMD },
 });

@@ -1,28 +1,37 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../../theme';
+import { Palette } from '../../theme';
 
 export default function Logo() {
   return (
     <View style={styles.container}>
-      <View style={styles.logoCircle} />
-      <Text style={styles.title}>reFind</Text>
+      <View style={styles.logoBox}>
+        <Text style={styles.mark}>R</Text>
+      </View>
+      <Text style={styles.title}>Refind</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center' },
-  logoCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    backgroundColor: Colors.purple,
+  logoBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    backgroundColor: Palette.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
+  mark: {
+    fontFamily: 'DMSerifDisplay-Italic',
+    fontSize: 36,
+    color: '#0C0C0C',
+  },
   title: {
-    color: Colors.text,
-    fontSize: 22,
-    fontWeight: '700',
+    fontFamily: 'DMSerifDisplay-Italic',
+    fontSize: 34,
+    color: Palette.textPrimary,
   },
 });
