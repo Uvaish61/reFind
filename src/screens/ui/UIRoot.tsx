@@ -7,9 +7,10 @@ import SignupScreen from '../auth/SignupScreen';
 import HomeScreen from '../home/HomeScreen';
 import SearchScreen from '../search/SearchScreen';
 import SavePreviewScreen from '../savePreview/SavePreviewScreen';
+import SaveSuccessScreen from '../savePreview/SaveSuccessScreen';
 import LibraryScreen from '../library/LibraryScreen';
 import CollectionDetailScreen from '../library/CollectionDetailScreen';
-import { Collection } from '../../types';
+import { Collection, SavedItem } from '../../types';
 
 export type Screen =
   | 'splash'
@@ -21,6 +22,7 @@ export type Screen =
   | 'library'
   | 'collectionDetail'
   | 'savePreview'
+  | 'saveSuccess'
   | 'profile';
 
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
@@ -28,6 +30,7 @@ const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 export default function UIRoot() {
   const [screen, setScreen] = useState<Screen>('splash');
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+  const [lastSavedItem, setLastSavedItem] = useState<SavedItem | null>(null);
   const onboardingComplete = useRef(false);
 
   useEffect(() => {
@@ -62,7 +65,19 @@ export default function UIRoot() {
   }
 
   if (screen === 'savePreview') {
-    return <SavePreviewScreen onCancelPress={() => setScreen('home')} onSavePress={() => setScreen('home')} />;
+    return (
+      <SavePreviewScreen
+        onBack={() => setScreen('home')}
+        onSaved={(item) => {
+          setLastSavedItem(item);
+          setScreen('saveSuccess');
+        }}
+      />
+    );
+  }
+
+  if (screen === 'saveSuccess') {
+    return <SaveSuccessScreen navigate={setScreen} savedItem={lastSavedItem} />;
   }
 
   if (screen === 'library') {

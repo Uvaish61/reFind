@@ -10,7 +10,7 @@ type Props = {
   onPress: (item: SavedItem) => void;
 };
 
-const platformGradient: Record<Platform, string[]> = {
+export const platformGradient: Record<Platform, string[]> = {
   instagram: ['#833ab4', '#fd1d1d'],
   youtube: ['#1a1a00', '#8aaa00'],
   linkedin: ['#001a28', '#0077b5'],

@@ -60,3 +60,8 @@ export async function getItemCountForCollection(collectionName: string): Promise
   const items = await getAllItems();
   return items.filter(i => i.collection === collectionName).length;
 }
+
+export async function findItemByUrl(url: string): Promise<SavedItem | null> {
+  const items = await getAllItems();
+  return items.find(i => i.url === url) ?? null;
+}

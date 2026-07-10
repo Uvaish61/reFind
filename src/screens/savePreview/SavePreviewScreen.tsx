@@ -1,216 +1,377 @@
-import React, { useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput, FlatList, Alert } from 'react-native';
-import { Colors } from '../../theme';
-import GradientButton from '../../components/buttons/GradientButton';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  Platform as RNPlatform,
+  Clipboard,
+  StatusBar,
+  StyleSheet,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link, X, ChevronDown, BookmarkPlus } from 'lucide-react-native';
+import { Palette, Radius, Spacing } from '../../theme';
+import { SavedItem, Collection } from '../../types';
+import * as storage from '../../services/storage';
+import { fetchUrlMetadata, detectPlatform, UrlMetadata } from '../../services/metadata';
+import MetadataPreviewCard from '../../components/common/MetadataPreviewCard';
+import CollectionPickerSheet from '../../components/common/CollectionPickerSheet';
+import CreateCollectionSheet from '../../components/common/CreateCollectionSheet';
+import TagInput from '../../components/inputs/TagInput';
 
-type SavePreviewScreenProps = {
-  onSavePress?: (data: { title: string; url: string; notes: string; tags: string[]; collection: string }) => void;
-  onCancelPress?: () => void;
+type Props = {
+  onBack: () => void;
+  onSaved: (item: SavedItem) => void;
+  initialUrl?: string;
 };
 
-const mockCollections = ['Development', 'AI', 'Fitness', 'Jobs', 'Inbox'];
-
-const mockPreview = {
-  url: 'https://youtube.com/watch?v=abc123',
-  title: 'How to master React hooks in 2024',
-  thumbnail: undefined,
-  platform: 'youtube' as const,
-};
-
-const platformColors: Record<string, string> = {
-  instagram: '#E1306C',
-  youtube: '#FF0000',
-  linkedin: '#0077B5',
-  twitter: '#1DA1F2',
-  link: '#7C3AED',
-};
-
-export default function SavePreviewScreen({ onSavePress, onCancelPress }: SavePreviewScreenProps) {
-  const [notes, setNotes] = useState('');
-  const [tagInput, setTagInput] = useState('');
+export default function SavePreviewScreen({ onBack, onSaved, initialUrl }: Props) {
+  const [url, setUrl] = useState(initialUrl ?? '');
+  const [metadata, setMetadata] = useState<UrlMetadata | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [customTitle, setCustomTitle] = useState('');
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
-  const [selectedCollection, setSelectedCollection] = useState(mockCollections[0]);
-  const [loading, setLoading] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [showCollectionPicker, setShowCollectionPicker] = useState(false);
+  const [showCreateCollection, setShowCreateCollection] = useState(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
+  const loadCollections = () => {
+    storage.getAllCollections().then(setCollections);
+  };
+
+  useEffect(() => {
+    loadCollections();
+    storage.getAllItems().then((items) => {
+      const allTags = items.flatMap((i) => i.tags);
+      const freq = allTags.reduce<Record<string, number>>((acc, t) => {
+        acc[t] = (acc[t] ?? 0) + 1;
+        return acc;
+      }, {});
+      const sorted = Object.entries(freq)
+        .sort((a, b) => b[1] - a[1])
+        .map(([t]) => t);
+      setSuggestedTags(sorted.slice(0, 10));
+    });
+  }, []);
+
+  useEffect(() => {
+    // Mount-only: fires just for the initial share-intent URL, not on every keystroke.
+    if (initialUrl) handleFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleFetch = async () => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      setFetchError('Please enter a valid URL starting with https://');
+      return;
+    }
+
+    setIsFetching(true);
+    setFetchError(null);
+
+    const existing = await storage.findItemByUrl(trimmed);
+    if (existing) {
+      setFetchError('Already saved! Tap to view.');
+      setIsFetching(false);
+      return;
+    }
+
+    try {
+      const data = await fetchUrlMetadata(trimmed);
+      setMetadata(data);
+      setCustomTitle(data.title);
+    } catch {
+      setFetchError('Could not fetch metadata. You can still save manually.');
+      setMetadata({ title: trimmed, platform: detectPlatform(trimmed), originalUrl: trimmed });
+      setCustomTitle('');
+    }
+
+    setIsFetching(false);
+  };
+
+  const handlePasteFromClipboard = async () => {
+    const text = await Clipboard.getString();
+    if (text) {
+      setUrl(text);
+      setMetadata(null);
     }
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
+  const handleSave = async () => {
+    if (!metadata || !customTitle.trim()) return;
 
-  const handleSave = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const saveData = {
-        title: mockPreview.title,
-        url: mockPreview.url,
-        notes,
-        tags,
-        collection: selectedCollection,
-      };
-      if (onSavePress) onSavePress(saveData);
-      else Alert.alert('Saved!', 'This is a UI-only preview for now.');
-    }, 600);
+    setIsSaving(true);
+
+    const newItem: SavedItem = {
+      id: Date.now().toString(),
+      url: metadata.originalUrl,
+      title: customTitle.trim(),
+      originalTitle: metadata.title,
+      platform: metadata.platform,
+      creator: metadata.creator ?? '',
+      thumbnailUri: metadata.thumbnailUrl,
+      collection: selectedCollection ?? undefined,
+      tags,
+      notes: notes.trim() || undefined,
+      isFavorite: false,
+      savedAt: new Date().toISOString(),
+    };
+
+    await storage.saveItem(newItem);
+
+    setIsSaving(false);
+    onSaved(newItem);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Save to reFind</Text>
-        <TouchableOpacity onPress={onCancelPress} activeOpacity={0.8} style={styles.closeBtn}>
-          <Text style={styles.closeText}>✕</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Preview Thumbnail */}
-        {mockPreview.thumbnail ? (
-          <Image source={{ uri: mockPreview.thumbnail }} style={styles.thumbnail} />
-        ) : (
-          <View style={styles.placeholderThumbnail} />
-        )}
-
-        {/* URL and Platform Badge */}
-        <View style={styles.urlWrapper}>
-          <View style={[styles.platformBadge, { backgroundColor: platformColors[mockPreview.platform] || Colors.purple }]}>
-            <Text style={styles.platformText}>{mockPreview.platform[0].toUpperCase()}</Text>
-          </View>
-          <Text style={styles.url} numberOfLines={1}>
-            {mockPreview.url}
-          </Text>
-        </View>
-
-        {/* Title */}
-        <Text style={styles.previewTitle}>{mockPreview.title}</Text>
-
-        {/* Notes */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Notes</Text>
-          <TextInput
-            style={styles.notesInput}
-            placeholder="Add personal notes..."
-            placeholderTextColor={Colors.muted}
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-            numberOfLines={3}
-          />
-        </View>
-
-        {/* Tags */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Tags</Text>
-          <View style={styles.tagInputRow}>
-            <TextInput
-              style={styles.tagInput}
-              placeholder="Add a tag..."
-              placeholderTextColor={Colors.muted}
-              value={tagInput}
-              onChangeText={setTagInput}
-              onSubmitEditing={handleAddTag}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity onPress={handleAddTag} style={styles.addTagBtn} activeOpacity={0.8}>
-              <Text style={styles.addTagText}>+</Text>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <StatusBar barStyle="light-content" backgroundColor={Palette.bg} />
+      <KeyboardAvoidingView behavior={RNPlatform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Add New</Text>
+            <TouchableOpacity onPress={onBack} activeOpacity={0.8}>
+              <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           </View>
 
-          <FlatList
-            data={tags}
-            renderItem={({ item }) => (
-              <View style={styles.tagChip}>
-                <Text style={styles.tagChipText}>{item}</Text>
-                <TouchableOpacity onPress={() => handleRemoveTag(item)} activeOpacity={0.8}>
-                  <Text style={styles.tagRemoveText}> ✕</Text>
+          <View style={styles.urlSection}>
+            <Text style={styles.label}>PASTE LINK</Text>
+            <View style={[styles.urlInputRow, url ? styles.urlInputRowActive : null]}>
+              <Link size={16} color={url ? Palette.accent : Palette.textDisabled} />
+              <TextInput
+                value={url}
+                onChangeText={(text) => {
+                  setUrl(text);
+                  setMetadata(null);
+                  setFetchError(null);
+                }}
+                placeholder="https://..."
+                placeholderTextColor={Palette.textDisabled}
+                style={styles.urlInput}
+                keyboardType="url"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="go"
+                onSubmitEditing={handleFetch}
+              />
+              {url.length > 0 && !isFetching ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    setUrl('');
+                    setMetadata(null);
+                  }}
+                  style={styles.clearBtn}
+                >
+                  <X size={14} color={Palette.textMuted} />
+                </TouchableOpacity>
+              ) : null}
+              <TouchableOpacity
+                onPress={handleFetch}
+                disabled={!url.trim() || isFetching}
+                style={[styles.fetchBtn, { backgroundColor: url.trim() ? Palette.accent : Palette.input, opacity: isFetching ? 0.6 : 1 }]}
+              >
+                {isFetching ? (
+                  <ActivityIndicator size="small" color="#0C0C0C" />
+                ) : (
+                  <Text style={[styles.fetchBtnText, { color: url.trim() ? '#0C0C0C' : Palette.textDisabled }]}>Fetch</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity onPress={handlePasteFromClipboard} style={styles.pasteBtn} activeOpacity={0.8}>
+              <Text style={styles.pasteText}>Paste from clipboard</Text>
+            </TouchableOpacity>
+
+            {fetchError ? <Text style={styles.errorText}>{fetchError}</Text> : null}
+          </View>
+
+          {metadata ? <MetadataPreviewCard metadata={metadata} /> : null}
+
+          {metadata ? (
+            <View style={styles.form}>
+              <View>
+                <Text style={styles.label}>CUSTOM TITLE</Text>
+                <TextInput
+                  value={customTitle}
+                  onChangeText={setCustomTitle}
+                  style={[styles.textInput, { borderColor: customTitle ? Palette.borderAccent : Palette.border }]}
+                  placeholderTextColor={Palette.textDisabled}
+                  placeholder="Give it a memorable name..."
+                />
+              </View>
+
+              <View>
+                <Text style={styles.label}>COLLECTION</Text>
+                <TouchableOpacity
+                  onPress={() => setShowCollectionPicker(true)}
+                  style={[styles.collectionBtn, { borderColor: selectedCollection ? Palette.borderAccent : Palette.border }]}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.collectionBtnText, { color: selectedCollection ? Palette.accent : Palette.textDisabled }]}>
+                    {selectedCollection ? `📁 ${selectedCollection}` : 'Choose a collection...'}
+                  </Text>
+                  <ChevronDown size={16} color={Palette.textMuted} />
                 </TouchableOpacity>
               </View>
-            )}
-            keyExtractor={(item) => item}
-            horizontal
-            scrollEnabled={false}
-            contentContainerStyle={styles.tagsContainer}
-            showsHorizontalScrollIndicator={false}
-          />
-        </View>
 
-        {/* Collection */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Collection</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.collectionsScroll}>
-            {mockCollections.map((collection) => (
+              <View>
+                <Text style={styles.label}>TAGS</Text>
+                <TagInput tags={tags} onTagsChange={setTags} suggestedTags={suggestedTags} />
+              </View>
+
+              <View>
+                <Text style={styles.label}>NOTES</Text>
+                <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  placeholder="Add a personal note..."
+                  placeholderTextColor={Palette.textDisabled}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  style={styles.notesInput}
+                />
+              </View>
+
               <TouchableOpacity
-                key={collection}
-                onPress={() => setSelectedCollection(collection)}
-                style={[styles.collectionChip, selectedCollection === collection && styles.collectionChipActive]}
-                activeOpacity={0.8}
+                onPress={handleSave}
+                disabled={!metadata || isSaving || !customTitle.trim()}
+                style={[styles.saveBtn, { opacity: !metadata || !customTitle.trim() ? 0.4 : 1 }]}
+                activeOpacity={0.85}
               >
-                <Text style={[styles.collectionChipText, selectedCollection === collection && styles.collectionChipTextActive]}>
-                  {collection}
-                </Text>
+                {isSaving ? (
+                  <ActivityIndicator color="#0C0C0C" />
+                ) : (
+                  <>
+                    <BookmarkPlus size={18} color="#0C0C0C" />
+                    <Text style={styles.saveBtnText}>Save to Refind</Text>
+                  </>
+                )}
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+            </View>
+          ) : null}
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-        {/* Actions */}
-        <View style={styles.actions}>
-          <GradientButton title={loading ? 'Saving...' : 'Save Reel'} onPress={handleSave} disabled={loading} loading={loading} />
-          <TouchableOpacity onPress={onCancelPress} activeOpacity={0.8} style={styles.cancelBtn}>
-            <Text style={styles.cancelText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      <CollectionPickerSheet
+        visible={showCollectionPicker}
+        collections={collections}
+        selectedCollection={selectedCollection}
+        onSelect={setSelectedCollection}
+        onClose={() => setShowCollectionPicker(false)}
+        onCreateNew={() => {
+          setShowCollectionPicker(false);
+          setShowCreateCollection(true);
+        }}
+      />
+
+      <CreateCollectionSheet
+        visible={showCreateCollection}
+        onClose={() => setShowCreateCollection(false)}
+        onCreate={(collection) => {
+          loadCollections();
+          setSelectedCollection(collection.name);
+        }}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#162033' },
-  title: { color: Colors.text, fontSize: 18, fontWeight: '700' },
-  closeBtn: { width: 32, height: 32, justifyContent: 'center', alignItems: 'center' },
-  closeText: { color: Colors.muted, fontSize: 20, fontWeight: '300' },
-  content: { paddingHorizontal: 20, paddingVertical: 16 },
-  thumbnail: { width: '100%', height: 200, borderRadius: 12, marginBottom: 16, backgroundColor: '#1F2937' },
-  placeholderThumbnail: { width: '100%', height: 200, borderRadius: 12, marginBottom: 16, backgroundColor: Colors.card },
-  urlWrapper: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  platformBadge: { width: 28, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center', marginRight: 10 },
-  platformText: { color: Colors.text, fontWeight: '700', fontSize: 12 },
-  url: { flex: 1, color: Colors.muted, fontSize: 12 },
-  previewTitle: { color: Colors.text, fontSize: 16, fontWeight: '700', marginBottom: 16, lineHeight: 22 },
-  section: { marginBottom: 16 },
-  sectionLabel: { color: Colors.text, fontSize: 13, fontWeight: '600', marginBottom: 8 },
-  notesInput: {
-    backgroundColor: Colors.card,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: Colors.text,
-    fontSize: 13,
-    borderWidth: 1,
-    borderColor: '#162033',
-    textAlignVertical: 'top',
+  container: { flex: 1, backgroundColor: Palette.bg },
+  flex: { flex: 1 },
+  scrollContent: { paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, paddingBottom: 48 },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.xxl - 4,
+    paddingTop: Spacing.sm,
   },
-  tagInputRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  tagInput: { flex: 1, backgroundColor: Colors.card, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: Colors.text, fontSize: 13, borderWidth: 1, borderColor: '#162033' },
-  addTagBtn: { width: 40, height: 40, backgroundColor: Colors.purple, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  addTagText: { color: Colors.text, fontSize: 18, fontWeight: '300' },
-  tagsContainer: { gap: 8, paddingBottom: 8, flexWrap: 'wrap' },
-  tagChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0F1724', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: '#1F2937' },
-  tagChipText: { color: Colors.text, fontSize: 12, fontWeight: '500' },
-  tagRemoveText: { color: Colors.muted, fontSize: 12 },
-  collectionsScroll: { marginBottom: 4 },
-  collectionChip: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, backgroundColor: Colors.card, marginRight: 8, borderWidth: 1, borderColor: 'transparent' },
-  collectionChipActive: { backgroundColor: Colors.purple, borderColor: Colors.purple },
-  collectionChipText: { color: Colors.muted, fontWeight: '600', fontSize: 13 },
-  collectionChipTextActive: { color: Colors.text },
-  actions: { marginTop: 8 },
-  cancelBtn: { marginTop: 10, alignItems: 'center', paddingVertical: 12 },
-  cancelText: { color: Colors.muted, fontWeight: '600', fontSize: 14 },
+  headerTitle: { fontFamily: 'DMSerifDisplay-Italic', fontSize: 30, color: Palette.textPrimary },
+  cancelText: { fontFamily: 'DMSans-Regular', fontSize: 14, color: Palette.textMuted },
+
+  label: { fontFamily: 'DMSans-SemiBold', fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase', color: Palette.textMuted, marginBottom: 8 },
+
+  urlSection: { marginBottom: Spacing.xl },
+  urlInputRow: {
+    backgroundColor: Palette.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingLeft: Spacing.lg,
+    paddingRight: 6,
+  },
+  urlInputRowActive: { borderColor: Palette.borderAccent },
+  urlInput: { flex: 1, fontFamily: 'DMSans-Regular', fontSize: 13, color: Palette.textPrimary, padding: 12 },
+  clearBtn: { padding: 8 },
+  fetchBtn: { borderRadius: Radius.sm + 2, paddingVertical: 8, paddingHorizontal: 14 },
+  fetchBtnText: { fontFamily: 'DMSans-Bold', fontSize: 12 },
+  pasteBtn: { marginTop: 8, alignSelf: 'flex-start' },
+  pasteText: { fontFamily: 'DMSans-Regular', fontSize: 12, color: Palette.accent },
+  errorText: { fontFamily: 'DMSans-Regular', fontSize: 12, color: Palette.danger, marginTop: 8 },
+
+  form: { gap: Spacing.lg },
+  textInput: {
+    backgroundColor: Palette.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.lg,
+    fontFamily: 'DMSans-Regular',
+    fontSize: 14,
+    color: Palette.textPrimary,
+  },
+  collectionBtn: {
+    backgroundColor: Palette.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  collectionBtnText: { fontFamily: 'DMSans-Regular', fontSize: 14 },
+  notesInput: {
+    backgroundColor: Palette.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    padding: 14,
+    minHeight: 90,
+    fontFamily: 'DMSans-Regular',
+    fontSize: 14,
+    color: Palette.textPrimary,
+    lineHeight: 20,
+  },
+
+  saveBtn: {
+    marginTop: 8,
+    backgroundColor: Palette.accent,
+    borderRadius: Radius.xl,
+    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  saveBtnText: { fontFamily: 'DMSans-Bold', fontSize: 16, color: '#0C0C0C' },
 });
