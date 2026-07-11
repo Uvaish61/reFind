@@ -16,6 +16,11 @@ export interface SavedItem {
   viewedAt?: string;
 }
 
+export interface ArchivedItem extends SavedItem {
+  archivedAt: string; // ISO date
+  autoDeleteAt: string; // ISO date — 30 days after archival
+}
+
 export interface Collection {
   id: string;
   name: string;

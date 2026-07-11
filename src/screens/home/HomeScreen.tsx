@@ -122,7 +122,16 @@ export default function HomeScreen({ navigate }: Props) {
             <FlatList
               data={recentItems}
               keyExtractor={(item) => item.id}
-              renderItem={({ item }) => <ReelCard item={item} onPress={() => {}} />}
+              renderItem={({ item }) => (
+                <ReelCard
+                  item={item}
+                  onPress={() => {}}
+                  onArchive={async () => {
+                    await storage.archiveItem(item.id);
+                    setRecentItems((prev) => prev.filter((i) => i.id !== item.id));
+                  }}
+                />
+              )}
               scrollEnabled={false}
               contentContainerStyle={styles.listContent}
               ItemSeparatorComponent={() => <View style={styles.separator} />}

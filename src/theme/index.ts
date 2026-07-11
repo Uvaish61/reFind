@@ -35,6 +35,7 @@ export const Palette = {
   border: 'rgba(242, 237, 228, 0.07)',
   borderAccent: 'rgba(207, 255, 71, 0.3)',
   danger: 'rgba(220, 80, 80, 0.85)',
+  dangerDim: 'rgba(220, 80, 80, 0.1)',
 } as const;
 
 export const Typography = {

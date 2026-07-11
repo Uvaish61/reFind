@@ -12,6 +12,9 @@ import LibraryScreen from '../library/LibraryScreen';
 import CollectionDetailScreen from '../library/CollectionDetailScreen';
 import ProfileScreen from '../profile/ProfileScreen';
 import StatisticsScreen from '../statistics/StatisticsScreen';
+import FavoritesScreen from '../favorites/FavoritesScreen';
+import ArchiveScreen from '../archive/ArchiveScreen';
+import * as storage from '../../services/storage';
 import { Collection, SavedItem } from '../../types';
 
 export type Screen =
@@ -26,7 +29,9 @@ export type Screen =
   | 'savePreview'
   | 'saveSuccess'
   | 'profile'
-  | 'statistics';
+  | 'statistics'
+  | 'favorites'
+  | 'archive';
 
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
@@ -40,6 +45,7 @@ export default function UIRoot() {
     AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY).then((value) => {
       onboardingComplete.current = value === 'true';
     });
+    storage.purgeExpiredArchive();
   }, []);
 
   const finishOnboarding = () => {
@@ -105,6 +111,14 @@ export default function UIRoot() {
 
   if (screen === 'statistics') {
     return <StatisticsScreen navigate={setScreen} onBack={() => setScreen('profile')} />;
+  }
+
+  if (screen === 'favorites') {
+    return <FavoritesScreen navigate={setScreen} onBack={() => setScreen('profile')} />;
+  }
+
+  if (screen === 'archive') {
+    return <ArchiveScreen navigate={setScreen} onBack={() => setScreen('profile')} />;
   }
 
   return <HomeScreen navigate={setScreen} />;

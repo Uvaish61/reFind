@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SavedItem, Collection } from '../types';
+import { SavedItem, Collection, ArchivedItem } from '../types';
 
 const STORAGE_KEY = '@refind_items';
 const COLLECTIONS_KEY = '@refind_collections';
+const ARCHIVE_KEY = '@refind_archive';
 
 export async function getAllItems(): Promise<SavedItem[]> {
   const json = await AsyncStorage.getItem(STORAGE_KEY);
@@ -64,4 +65,53 @@ export async function getItemCountForCollection(collectionName: string): Promise
 export async function findItemByUrl(url: string): Promise<SavedItem | null> {
   const items = await getAllItems();
   return items.find(i => i.url === url) ?? null;
+}
+
+export async function archiveItem(id: string): Promise<void> {
+  const items = await getAllItems();
+  const target = items.find(i => i.id === id);
+  if (!target) return;
+
+  const archivedItem: ArchivedItem = {
+    ...target,
+    archivedAt: new Date().toISOString(),
+    autoDeleteAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+  };
+
+  const allArchived = await getAllArchived();
+  await AsyncStorage.setItem(ARCHIVE_KEY, JSON.stringify([...allArchived, archivedItem]));
+  await deleteItem(id);
+}
+
+export async function getAllArchived(): Promise<ArchivedItem[]> {
+  const json = await AsyncStorage.getItem(ARCHIVE_KEY);
+  return json ? JSON.parse(json) : [];
+}
+
+export async function restoreItem(id: string): Promise<void> {
+  const allArchived = await getAllArchived();
+  const target = allArchived.find(i => i.id === id);
+  if (!target) return;
+
+  const item: SavedItem = { ...target };
+  delete (item as Partial<ArchivedItem>).archivedAt;
+  delete (item as Partial<ArchivedItem>).autoDeleteAt;
+  await saveItem(item);
+  await deleteArchived(id);
+}
+
+export async function deleteArchived(id: string): Promise<void> {
+  const all = await getAllArchived();
+  const next = all.filter(i => i.id !== id);
+  await AsyncStorage.setItem(ARCHIVE_KEY, JSON.stringify(next));
+}
+
+export async function clearArchive(): Promise<void> {
+  await AsyncStorage.removeItem(ARCHIVE_KEY);
+}
+
+export async function purgeExpiredArchive(): Promise<void> {
+  const all = await getAllArchived();
+  const live = all.filter(i => new Date(i.autoDeleteAt).getTime() > Date.now());
+  await AsyncStorage.setItem(ARCHIVE_KEY, JSON.stringify(live));
 }

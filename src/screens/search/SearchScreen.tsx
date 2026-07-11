@@ -236,7 +236,16 @@ export default function SearchScreen({ navigate, initialQuery }: Props) {
       <FlatList
         data={isLoading ? [] : filteredResults}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ReelCard item={item} onPress={handleItemPress} />}
+        renderItem={({ item }) => (
+          <ReelCard
+            item={item}
+            onPress={handleItemPress}
+            onArchive={async () => {
+              await storage.archiveItem(item.id);
+              setAllItems((prev) => prev.filter((i) => i.id !== item.id));
+            }}
+          />
+        )}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListHeaderComponent={

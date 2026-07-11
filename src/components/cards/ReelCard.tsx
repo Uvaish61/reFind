@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { Play } from 'lucide-react-native';
+import React, { useRef } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Animated, PanResponder } from 'react-native';
+import { Play, Archive } from 'lucide-react-native';
 import { Palette, Radius, Spacing } from '../../theme';
 import { SavedItem, Platform } from '../../types';
 import GradientBox from '../common/GradientBox';
@@ -8,6 +8,7 @@ import GradientBox from '../common/GradientBox';
 type Props = {
   item: SavedItem;
   onPress: (item: SavedItem) => void;
+  onArchive?: () => void;
 };
 
 export const platformGradient: Record<Platform, string[]> = {
@@ -35,50 +36,91 @@ function timeAgo(isoDate: string): string {
   return `${days} days`;
 }
 
-export default function ReelCard({ item, onPress }: Props) {
+export default function ReelCard({ item, onPress, onArchive }: Props) {
   const tags = item.tags.slice(0, 2);
+  const pan = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => !!onArchive && Math.abs(g.dx) > 10 && Math.abs(g.dy) < 20,
+      onPanResponderMove: (_, g) => {
+        if (g.dx < 0) pan.setValue(g.dx);
+      },
+      onPanResponderRelease: (_, g) => {
+        if (g.dx < -80) {
+          Animated.timing(pan, { toValue: -400, duration: 250, useNativeDriver: true }).start(() => onArchive?.());
+        } else {
+          Animated.spring(pan, { toValue: 0, useNativeDriver: true }).start();
+        }
+      },
+    }),
+  ).current;
 
   return (
-    <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={() => onPress(item)}>
-      <View style={styles.thumbnail}>
-        {item.thumbnailUri ? (
-          <Image source={{ uri: item.thumbnailUri }} style={styles.thumbnailImage} />
-        ) : (
-          <GradientBox colors={platformGradient[item.platform]} width={62} height={62} borderRadius={Radius.md}>
-            {videoPlatforms.includes(item.platform) ? (
-              <Play size={14} color="rgba(255,255,255,0.8)" fill="rgba(255,255,255,0.8)" />
-            ) : null}
-          </GradientBox>
-        )}
-      </View>
+    <View style={styles.wrapper}>
+      {onArchive ? (
+        <View style={styles.archiveReveal}>
+          <Archive size={20} color={Palette.danger} />
+          <Text style={styles.archiveRevealText}>Archive</Text>
+        </View>
+      ) : null}
 
-      <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={1}>
-          {item.title}
-        </Text>
-        <Text style={styles.meta} numberOfLines={1}>
-          {item.creator} · {capitalize(item.platform)}
-        </Text>
-        {tags.length > 0 ? (
-          <View style={styles.tagsRow}>
-            {tags.map((tag) => (
-              <View key={tag} style={styles.tagChip}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
+      <Animated.View {...panResponder.panHandlers} style={{ transform: [{ translateX: pan }] }}>
+        <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={() => onPress(item)}>
+          <View style={styles.thumbnail}>
+            {item.thumbnailUri ? (
+              <Image source={{ uri: item.thumbnailUri }} style={styles.thumbnailImage} />
+            ) : (
+              <GradientBox colors={platformGradient[item.platform]} width={62} height={62} borderRadius={Radius.md}>
+                {videoPlatforms.includes(item.platform) ? (
+                  <Play size={14} color="rgba(255,255,255,0.8)" fill="rgba(255,255,255,0.8)" />
+                ) : null}
+              </GradientBox>
+            )}
           </View>
-        ) : null}
-      </View>
 
-      <View style={styles.meta2}>
-        {item.isFavorite ? <View style={styles.favoriteDot} /> : <View style={styles.favoriteDotEmpty} />}
-        <Text style={styles.timeText}>{timeAgo(item.savedAt)}</Text>
-      </View>
-    </TouchableOpacity>
+          <View style={styles.info}>
+            <Text style={styles.title} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.meta} numberOfLines={1}>
+              {item.creator} · {capitalize(item.platform)}
+            </Text>
+            {tags.length > 0 ? (
+              <View style={styles.tagsRow}>
+                {tags.map((tag) => (
+                  <View key={tag} style={styles.tagChip}>
+                    <Text style={styles.tagText}>{tag}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </View>
+
+          <View style={styles.meta2}>
+            {item.isFavorite ? <View style={styles.favoriteDot} /> : <View style={styles.favoriteDotEmpty} />}
+            <Text style={styles.timeText}>{timeAgo(item.savedAt)}</Text>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: { position: 'relative' },
+  archiveReveal: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 80,
+    backgroundColor: Palette.dangerDim,
+    borderRadius: Radius.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  archiveRevealText: { fontFamily: 'DMSans-Regular', fontSize: 10, color: Palette.danger, marginTop: 4 },
   container: {
     backgroundColor: Palette.card,
     borderRadius: Radius.xl,

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Search, BookOpen, User, Plus } from 'lucide-react-native';
 import { Palette } from '../../theme';
@@ -30,18 +30,49 @@ const RIGHT_TABS: TabDef[] = [
 
 function NavTab({ tab, active, onPress }: { tab: TabDef; active: boolean; onPress: () => void }) {
   const { Icon, label, shape } = tab;
+  const press = useRef(new Animated.Value(1)).current;
+  const activeAnim = useRef(new Animated.Value(active ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(activeAnim, { toValue: active ? 1 : 0, tension: 160, friction: 11, useNativeDriver: false }).start();
+  }, [active, activeAnim]);
+
+  const onPressIn = () => Animated.spring(press, { toValue: 0.85, useNativeDriver: true, speed: 40, bounciness: 8 }).start();
+  const onPressOut = () => Animated.spring(press, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 10 }).start();
+
+  const backgroundColor = activeAnim.interpolate({ inputRange: [0, 1], outputRange: ['transparent', Palette.accent] });
+  const borderWidth = activeAnim.interpolate({ inputRange: [0, 1], outputRange: [1.5, 0] });
+  const iconScale = activeAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
+
   return (
-    <TouchableOpacity style={styles.tab} activeOpacity={0.8} onPress={onPress}>
-      <View
+    <TouchableOpacity style={styles.tab} activeOpacity={1} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+      <Animated.View
         style={[
           styles.iconContainer,
-          { borderRadius: shape === 'circle' ? 10 : 5 },
-          active ? styles.iconContainerActive : styles.iconContainerInactive,
+          { borderRadius: shape === 'circle' ? 17 : 9, borderColor: Palette.textMuted, backgroundColor, borderWidth },
+          { transform: [{ scale: press }] },
         ]}
       >
-        <Icon size={12} color={active ? '#0C0C0C' : Palette.textMuted} />
-      </View>
+        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+          <Icon size={18} color={active ? '#0C0C0C' : Palette.textMuted} />
+        </Animated.View>
+      </Animated.View>
       <Text style={active ? styles.labelActive : styles.labelInactive}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function AddButton({ onPress }: { onPress: () => void }) {
+  const press = useRef(new Animated.Value(1)).current;
+
+  const onPressIn = () => Animated.spring(press, { toValue: 0.88, useNativeDriver: true, speed: 40, bounciness: 8 }).start();
+  const onPressOut = () => Animated.spring(press, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 12 }).start();
+
+  return (
+    <TouchableOpacity activeOpacity={1} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+      <Animated.View style={[styles.addBtn, { transform: [{ scale: press }] }]}>
+        <Plus size={26} color="#0C0C0C" />
+      </Animated.View>
     </TouchableOpacity>
   );
 }
@@ -55,9 +86,7 @@ export default function BottomNavBar({ activeTab, onTabPress }: Props) {
         <NavTab key={tab.key} tab={tab} active={activeTab === tab.key} onPress={() => onTabPress(tab.key)} />
       ))}
 
-      <TouchableOpacity style={styles.addBtn} activeOpacity={0.85} onPress={() => onTabPress('add')}>
-        <Plus size={24} color="#0C0C0C" />
-      </TouchableOpacity>
+      <AddButton onPress={() => onTabPress('add')} />
 
       {RIGHT_TABS.map((tab) => (
         <NavTab key={tab.key} tab={tab} active={activeTab === tab.key} onPress={() => onTabPress(tab.key)} />
@@ -81,16 +110,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
   },
-  tab: { flexDirection: 'column', alignItems: 'center', gap: 4 },
-  iconContainer: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
-  iconContainerActive: { backgroundColor: Palette.accent },
-  iconContainerInactive: { borderWidth: 1.5, borderColor: Palette.textMuted },
+  tab: { flexDirection: 'column', alignItems: 'center', gap: 6 },
+  iconContainer: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   labelActive: { fontFamily: 'DMSans-SemiBold', fontSize: 10, color: Palette.accent },
   labelInactive: { fontFamily: 'DMSans-Regular', fontSize: 10, color: Palette.textDisabled },
   addBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 18,
     backgroundColor: Palette.accent,
     alignItems: 'center',
     justifyContent: 'center',

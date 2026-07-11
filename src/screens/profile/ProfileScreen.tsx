@@ -23,11 +23,12 @@ export default function ProfileScreen({ navigate }: Props) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [defaultCollection] = useState<string | null>(null);
-  const [archiveCount] = useState(0);
+  const [archiveCount, setArchiveCount] = useState(0);
 
   useEffect(() => {
     const load = async () => {
-      const prefs = await AsyncStorage.getItem(PREFS_KEY);
+      const [prefs, archived] = await Promise.all([AsyncStorage.getItem(PREFS_KEY), storage.getAllArchived()]);
+      setArchiveCount(archived.length);
       if (prefs) {
         const p = JSON.parse(prefs);
         setIsDarkMode(p.isDarkMode ?? true);
@@ -104,8 +105,8 @@ export default function ProfileScreen({ navigate }: Props) {
 
         <SettingsSection title="Activity">
           <SettingsRow label="Statistics" icon={ChartColumn} onPress={() => navigate('statistics')} showChevron />
-          <SettingsRow label="Favorites" icon={Heart} onPress={() => {}} showChevron />
-          <SettingsRow label="Archive" icon={Archive} value={`${archiveCount} items`} onPress={() => {}} showChevron isLast />
+          <SettingsRow label="Favorites" icon={Heart} onPress={() => navigate('favorites')} showChevron />
+          <SettingsRow label="Archive" icon={Archive} value={`${archiveCount} items`} onPress={() => navigate('archive')} showChevron isLast />
         </SettingsSection>
 
         <SettingsSection title="Data">
