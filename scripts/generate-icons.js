@@ -1,3 +1,4 @@
+/* eslint-env node */
 // scripts/generate-icons.js
 // Run with: node scripts/generate-icons.js
 // Requires: npm install --save-dev sharp (one-time only for generation)
