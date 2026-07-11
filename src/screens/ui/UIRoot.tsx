@@ -14,12 +14,15 @@ import ProfileScreen from '../profile/ProfileScreen';
 import StatisticsScreen from '../statistics/StatisticsScreen';
 import FavoritesScreen from '../favorites/FavoritesScreen';
 import ArchiveScreen from '../archive/ArchiveScreen';
+import InterestPickerScreen from '../onboarding/InterestPickerScreen';
+import TagDetailScreen from '../tagDetail/TagDetailScreen';
 import * as storage from '../../services/storage';
 import { Collection, SavedItem } from '../../types';
 
 export type Screen =
   | 'splash'
   | 'onboarding'
+  | 'interestPicker'
   | 'signin'
   | 'signup'
   | 'home'
@@ -31,7 +34,8 @@ export type Screen =
   | 'profile'
   | 'statistics'
   | 'favorites'
-  | 'archive';
+  | 'archive'
+  | 'tagDetail';
 
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
@@ -39,6 +43,8 @@ export default function UIRoot() {
   const [screen, setScreen] = useState<Screen>('splash');
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [lastSavedItem, setLastSavedItem] = useState<SavedItem | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [tagDetailOrigin, setTagDetailOrigin] = useState<Screen>('home');
   const onboardingComplete = useRef(false);
 
   useEffect(() => {
@@ -48,7 +54,18 @@ export default function UIRoot() {
     storage.purgeExpiredArchive();
   }, []);
 
-  const finishOnboarding = () => {
+  const openTag = (tag: string, origin: Screen) => {
+    setSelectedTag(tag);
+    setTagDetailOrigin(origin);
+    setScreen('tagDetail');
+  };
+
+  const finishOnboardingToInterests = () => {
+    AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, 'true');
+    setScreen('interestPicker');
+  };
+
+  const finishOnboardingToSignIn = () => {
     AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, 'true');
     setScreen('signin');
   };
@@ -58,7 +75,11 @@ export default function UIRoot() {
   }
 
   if (screen === 'onboarding') {
-    return <OnboardingScreen onGetStarted={finishOnboarding} onSignInPress={finishOnboarding} />;
+    return <OnboardingScreen onGetStarted={finishOnboardingToInterests} onSignInPress={finishOnboardingToSignIn} />;
+  }
+
+  if (screen === 'interestPicker') {
+    return <InterestPickerScreen navigate={setScreen} />;
   }
 
   if (screen === 'signin') {
@@ -70,7 +91,7 @@ export default function UIRoot() {
   }
 
   if (screen === 'search') {
-    return <SearchScreen navigate={setScreen} />;
+    return <SearchScreen navigate={setScreen} onOpenTag={(tag) => openTag(tag, 'search')} />;
   }
 
   if (screen === 'savePreview') {
@@ -102,7 +123,14 @@ export default function UIRoot() {
   }
 
   if (screen === 'collectionDetail' && selectedCollection) {
-    return <CollectionDetailScreen collection={selectedCollection} navigate={setScreen} />;
+    return (
+      <CollectionDetailScreen
+        collection={selectedCollection}
+        navigate={setScreen}
+        onBack={() => setScreen('library')}
+        onOpenTag={(tag) => openTag(tag, 'collectionDetail')}
+      />
+    );
   }
 
   if (screen === 'profile') {
@@ -110,7 +138,13 @@ export default function UIRoot() {
   }
 
   if (screen === 'statistics') {
-    return <StatisticsScreen navigate={setScreen} onBack={() => setScreen('profile')} />;
+    return (
+      <StatisticsScreen
+        navigate={setScreen}
+        onBack={() => setScreen('profile')}
+        onOpenTag={(tag) => openTag(tag, 'statistics')}
+      />
+    );
   }
 
   if (screen === 'favorites') {
@@ -119,6 +153,16 @@ export default function UIRoot() {
 
   if (screen === 'archive') {
     return <ArchiveScreen navigate={setScreen} onBack={() => setScreen('profile')} />;
+  }
+
+  if (screen === 'tagDetail' && selectedTag) {
+    return (
+      <TagDetailScreen
+        tag={selectedTag}
+        onBack={() => setScreen(tagDetailOrigin)}
+        onOpenTag={(tag) => setSelectedTag(tag)}
+      />
+    );
   }
 
   return <HomeScreen navigate={setScreen} />;

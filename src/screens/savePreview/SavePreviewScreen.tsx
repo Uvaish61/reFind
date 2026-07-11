@@ -21,6 +21,7 @@ import { fetchUrlMetadata, detectPlatform, UrlMetadata } from '../../services/me
 import MetadataPreviewCard from '../../components/common/MetadataPreviewCard';
 import CollectionPickerSheet from '../../components/common/CollectionPickerSheet';
 import CreateCollectionSheet from '../../components/common/CreateCollectionSheet';
+import DuplicateAlertSheet from '../../components/common/DuplicateAlertSheet';
 import TagInput from '../../components/inputs/TagInput';
 
 type Props = {
@@ -43,6 +44,7 @@ export default function SavePreviewScreen({ onBack, onSaved, initialUrl }: Props
   const [showCreateCollection, setShowCreateCollection] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [duplicate, setDuplicate] = useState<SavedItem | null>(null);
 
   const loadCollections = () => {
     storage.getAllCollections().then(setCollections);
@@ -69,6 +71,20 @@ export default function SavePreviewScreen({ onBack, onSaved, initialUrl }: Props
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const fetchMetadataFor = async (trimmed: string) => {
+    setIsFetching(true);
+    try {
+      const data = await fetchUrlMetadata(trimmed);
+      setMetadata(data);
+      setCustomTitle(data.title);
+    } catch {
+      setFetchError('Could not fetch metadata. You can still save manually.');
+      setMetadata({ title: trimmed, platform: detectPlatform(trimmed), originalUrl: trimmed });
+      setCustomTitle('');
+    }
+    setIsFetching(false);
+  };
+
   const handleFetch = async () => {
     const trimmed = url.trim();
     if (!trimmed) return;
@@ -83,22 +99,12 @@ export default function SavePreviewScreen({ onBack, onSaved, initialUrl }: Props
 
     const existing = await storage.findItemByUrl(trimmed);
     if (existing) {
-      setFetchError('Already saved! Tap to view.');
+      setDuplicate(existing);
       setIsFetching(false);
       return;
     }
 
-    try {
-      const data = await fetchUrlMetadata(trimmed);
-      setMetadata(data);
-      setCustomTitle(data.title);
-    } catch {
-      setFetchError('Could not fetch metadata. You can still save manually.');
-      setMetadata({ title: trimmed, platform: detectPlatform(trimmed), originalUrl: trimmed });
-      setCustomTitle('');
-    }
-
-    setIsFetching(false);
+    await fetchMetadataFor(trimmed);
   };
 
   const handlePasteFromClipboard = async () => {
@@ -286,6 +292,23 @@ export default function SavePreviewScreen({ onBack, onSaved, initialUrl }: Props
           setSelectedCollection(collection.name);
         }}
       />
+
+      {duplicate ? (
+        <DuplicateAlertSheet
+          visible={!!duplicate}
+          existingItem={duplicate}
+          onOpenExisting={() => {
+            console.log('Open item detail:', duplicate.id);
+            setDuplicate(null);
+          }}
+          onSaveAnyway={() => {
+            const trimmed = url.trim();
+            setDuplicate(null);
+            fetchMetadataFor(trimmed);
+          }}
+          onClose={() => setDuplicate(null)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

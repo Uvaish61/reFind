@@ -13,6 +13,7 @@ import { Screen } from '../ui/UIRoot';
 type Props = {
   navigate: (screen: Screen) => void;
   onBack: () => void;
+  onOpenTag: (tag: string) => void;
 };
 
 type Period = 'week' | 'month' | 'alltime';
@@ -20,7 +21,7 @@ type Period = 'week' | 'month' | 'alltime';
 const PERIODS: Period[] = ['week', 'month', 'alltime'];
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export default function StatisticsScreen({ onBack }: Props) {
+export default function StatisticsScreen({ onBack, onOpenTag }: Props) {
   const [period, setPeriod] = useState<Period>('week');
   const [allItems, setAllItems] = useState<SavedItem[]>([]);
   const [collectionsCount, setCollectionsCount] = useState(0);
@@ -194,8 +195,10 @@ export default function StatisticsScreen({ onBack }: Props) {
                   const isBig = i === 0;
                   const opacity = 1 - (i / topTags.length) * 0.6;
                   return (
-                    <View
+                    <TouchableOpacity
                       key={tag}
+                      activeOpacity={0.7}
+                      onPress={() => onOpenTag(tag)}
                       style={[
                         styles.tagChip,
                         { backgroundColor: isBig ? Palette.accent : Palette.accentDim, paddingVertical: isBig ? 6 : 4, paddingHorizontal: isBig ? 14 : 10, opacity },
@@ -204,7 +207,7 @@ export default function StatisticsScreen({ onBack }: Props) {
                       <Text style={{ fontFamily: isBig ? 'DMSans-Bold' : 'DMSans-Regular', fontSize: isBig ? 13 : 11, color: isBig ? '#0C0C0C' : Palette.accent }}>
                         #{tag} · {count}
                       </Text>
-                    </View>
+                    </TouchableOpacity>
                   );
                 })}
               </View>

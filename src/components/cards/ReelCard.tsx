@@ -9,6 +9,7 @@ type Props = {
   item: SavedItem;
   onPress: (item: SavedItem) => void;
   onArchive?: () => void;
+  onTagPress?: (tag: string) => void;
 };
 
 export const platformGradient: Record<Platform, string[]> = {
@@ -25,7 +26,7 @@ function capitalize(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function timeAgo(isoDate: string): string {
+export function timeAgo(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
@@ -36,7 +37,7 @@ function timeAgo(isoDate: string): string {
   return `${days} days`;
 }
 
-export default function ReelCard({ item, onPress, onArchive }: Props) {
+export default function ReelCard({ item, onPress, onArchive, onTagPress }: Props) {
   const tags = item.tags.slice(0, 2);
   const pan = useRef(new Animated.Value(0)).current;
 
@@ -88,11 +89,17 @@ export default function ReelCard({ item, onPress, onArchive }: Props) {
             </Text>
             {tags.length > 0 ? (
               <View style={styles.tagsRow}>
-                {tags.map((tag) => (
-                  <View key={tag} style={styles.tagChip}>
-                    <Text style={styles.tagText}>{tag}</Text>
-                  </View>
-                ))}
+                {tags.map((tag) =>
+                  onTagPress ? (
+                    <TouchableOpacity key={tag} style={styles.tagChip} onPress={() => onTagPress(tag)}>
+                      <Text style={styles.tagText}>{tag}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View key={tag} style={styles.tagChip}>
+                      <Text style={styles.tagText}>{tag}</Text>
+                    </View>
+                  ),
+                )}
               </View>
             ) : null}
           </View>

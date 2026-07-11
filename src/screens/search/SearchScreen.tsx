@@ -50,10 +50,11 @@ function nextSort(sortBy: SearchFilters['sortBy']): SearchFilters['sortBy'] {
 
 type Props = {
   navigate: (screen: Screen) => void;
+  onOpenTag: (tag: string) => void;
   initialQuery?: string;
 };
 
-export default function SearchScreen({ navigate, initialQuery }: Props) {
+export default function SearchScreen({ navigate, onOpenTag, initialQuery }: Props) {
   const [allItems, setAllItems] = useState<SavedItem[]>([]);
   const [query, setQuery] = useState(initialQuery ?? '');
   const [filters, setFilters] = useState<SearchFilters>(DEFAULT_FILTERS);
@@ -240,6 +241,7 @@ export default function SearchScreen({ navigate, initialQuery }: Props) {
           <ReelCard
             item={item}
             onPress={handleItemPress}
+            onTagPress={onOpenTag}
             onArchive={async () => {
               await storage.archiveItem(item.id);
               setAllItems((prev) => prev.filter((i) => i.id !== item.id));
