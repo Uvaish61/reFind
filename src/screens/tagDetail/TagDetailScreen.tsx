@@ -80,6 +80,10 @@ function EmptyTag({ tag }: { tag: string }) {
   );
 }
 
+function Separator() {
+  return <View style={styles.separator} />;
+}
+
 export default function TagDetailScreen({ tag, onBack, onOpenTag }: Props) {
   const [tagItems, setTagItems] = useState<SavedItem[]>([]);
   const [relatedTags, setRelatedTags] = useState<string[]>([]);
@@ -128,7 +132,7 @@ export default function TagDetailScreen({ tag, onBack, onOpenTag }: Props) {
           />
         }
         renderItem={({ item }) => <ReelCard item={item} onPress={() => {}} onTagPress={onOpenTag} />}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={Separator}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={!isLoading ? <EmptyTag tag={tag} /> : null}
         showsVerticalScrollIndicator={false}

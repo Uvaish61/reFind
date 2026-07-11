@@ -42,13 +42,13 @@ function InterestCell({ item, isActive, onPress }: { item: Interest; isActive: b
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      style={[styles.cell, { backgroundColor: isActive ? Palette.accentDim : Palette.card, borderWidth: isActive ? 1.5 : 1, borderColor: isActive ? Palette.accent : Palette.border }]}
+      style={[styles.cell, isActive ? styles.cellActive : styles.cellInactive]}
     >
       <Text style={styles.cellEmoji}>{item.emoji}</Text>
-      <Text style={[styles.cellLabel, { fontFamily: isActive ? 'DMSans-SemiBold' : 'DMSans-Regular', color: isActive ? Palette.accent : Palette.textMuted }]}>
+      <Text style={[styles.cellLabel, isActive ? styles.cellLabelActive : styles.cellLabelInactive]}>
         {item.label}
       </Text>
-      <View style={[styles.checkCircle, { backgroundColor: isActive ? Palette.accent : 'transparent', borderWidth: isActive ? 0 : 1.5 }]}>
+      <View style={[styles.checkCircle, isActive ? styles.checkCircleActive : styles.checkCircleInactive]}>
         <Animated.Text style={[styles.checkMark, { transform: [{ scale: checkAnim }], opacity: checkAnim }]}>✓</Animated.Text>
       </View>
     </TouchableOpacity>
@@ -110,7 +110,7 @@ export default function InterestPickerScreen({ navigate }: Props) {
             onPress={handleCreate}
             disabled={selectedCount === 0 || isCreating}
             activeOpacity={0.85}
-            style={[styles.primaryBtn, { backgroundColor: selectedCount > 0 ? Palette.accent : Palette.input, opacity: selectedCount === 0 ? 0.5 : 1 }]}
+            style={[styles.primaryBtn, selectedCount > 0 ? styles.primaryBtnActive : styles.primaryBtnInactive]}
           >
             {isCreating ? (
               <ActivityIndicator color="#0C0C0C" />
@@ -141,13 +141,21 @@ const styles = StyleSheet.create({
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GRID_GAP, marginBottom: 28 },
   cell: { width: CELL_WIDTH, borderRadius: Radius.xl, padding: 14, alignItems: 'center', gap: 8 },
+  cellActive: { backgroundColor: Palette.accentDim, borderWidth: 1.5, borderColor: Palette.accent },
+  cellInactive: { backgroundColor: Palette.card, borderWidth: 1, borderColor: Palette.border },
   cellEmoji: { fontSize: 26 },
   cellLabel: { fontSize: 12, textAlign: 'center' },
-  checkCircle: { width: 18, height: 18, borderRadius: 9, borderColor: Palette.border, alignItems: 'center', justifyContent: 'center' },
+  cellLabelActive: { fontFamily: 'DMSans-SemiBold', color: Palette.accent },
+  cellLabelInactive: { fontFamily: 'DMSans-Regular', color: Palette.textMuted },
+  checkCircle: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  checkCircleActive: { backgroundColor: Palette.accent, borderWidth: 0 },
+  checkCircleInactive: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: Palette.border },
   checkMark: { fontSize: 10, color: '#0C0C0C', fontWeight: '800' },
 
   cta: { gap: 10 },
   primaryBtn: { height: 54, borderRadius: Radius.xl, alignItems: 'center', justifyContent: 'center' },
+  primaryBtnActive: { backgroundColor: Palette.accent, opacity: 1 },
+  primaryBtnInactive: { backgroundColor: Palette.input, opacity: 0.5 },
   primaryBtnText: { fontFamily: 'DMSans-Bold', fontSize: 15, color: '#0C0C0C' },
   skipBtn: { alignItems: 'center', paddingTop: 4 },
   skipText: { fontFamily: 'DMSans-Regular', fontSize: 13, color: Palette.textMuted },

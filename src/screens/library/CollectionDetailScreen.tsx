@@ -75,6 +75,10 @@ function EmptyCollection({ onAdd }: { onAdd: () => void }) {
   );
 }
 
+function Separator() {
+  return <View style={styles.separator} />;
+}
+
 export default function CollectionDetailScreen({ collection, navigate, onBack, onOpenTag }: Props) {
   const [currentCollection, setCurrentCollection] = useState(collection);
   const [items, setItems] = useState<SavedItem[]>([]);
@@ -167,7 +171,7 @@ export default function CollectionDetailScreen({ collection, navigate, onBack, o
           renderItem={({ item }) => (
             <ReelCard item={item} onPress={() => {}} onTagPress={onOpenTag} />
           )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={Separator}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={!isLoading ? <EmptyCollection onAdd={() => navigate('savePreview')} /> : null}
           showsVerticalScrollIndicator={false}
@@ -182,7 +186,7 @@ export default function CollectionDetailScreen({ collection, navigate, onBack, o
           ListHeaderComponent={CollectionHeader}
           renderItem={({ item }) => <GridCard item={item} onPress={() => {}} />}
           columnWrapperStyle={styles.gridRow}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={Separator}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={!isLoading ? <EmptyCollection onAdd={() => navigate('savePreview')} /> : null}
           showsVerticalScrollIndicator={false}

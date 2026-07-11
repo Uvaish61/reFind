@@ -93,6 +93,10 @@ function EmptyFavorites() {
   );
 }
 
+function Separator() {
+  return <View style={styles.separator} />;
+}
+
 export default function FavoritesScreen({ onBack }: Props) {
   const [items, setItems] = useState<SavedItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,7 +151,7 @@ export default function FavoritesScreen({ onBack }: Props) {
         renderItem={({ item }) => (
           <FavoriteCard item={item} onPress={() => handleItemPress(item)} onUnfavorite={() => handleUnfavorite(item.id)} />
         )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={Separator}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={!isLoading ? <EmptyFavorites /> : null}
         showsVerticalScrollIndicator={false}

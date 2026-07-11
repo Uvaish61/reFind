@@ -80,13 +80,13 @@ function SaveSlide({ onNext }: { onNext: () => void }) {
           <GradientBox colors={['#833ab4', '#fd1d1d', '#fcb045']} width={44} height={44} borderRadius={12}>
             <Instagram size={20} color="#fff" />
           </GradientBox>
-          <View style={[styles.platformIcon, { backgroundColor: '#ff0000' }]}>
+          <View style={[styles.platformIcon, styles.platformIconYoutube]}>
             <Youtube size={20} color="#fff" />
           </View>
-          <View style={[styles.platformIcon, { backgroundColor: '#0077b5' }]}>
+          <View style={[styles.platformIcon, styles.platformIconLinkedin]}>
             <Linkedin size={20} color="#fff" />
           </View>
-          <View style={[styles.platformIcon, { backgroundColor: '#1877f2' }]}>
+          <View style={[styles.platformIcon, styles.platformIconFacebook]}>
             <Facebook size={20} color="#fff" />
           </View>
         </View>
@@ -264,6 +264,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  platformIconYoutube: { backgroundColor: '#ff0000' },
+  platformIconLinkedin: { backgroundColor: '#0077b5' },
+  platformIconFacebook: { backgroundColor: '#1877f2' },
   arrowWrap: { alignItems: 'center' },
   arrowLine: { width: 1, height: 32, backgroundColor: Palette.accentDim },
   logoIconSmall: {

@@ -33,7 +33,7 @@ export default function ToggleRow({ label, icon: Icon, value, onToggle, isLast }
         activeOpacity={0.8}
         onPress={() => onToggle(!value)}
       >
-        <Animated.View style={[styles.thumb, { backgroundColor: value ? '#0C0C0C' : 'rgba(242,237,228,0.4)', transform: [{ translateX }] }]} />
+        <Animated.View style={[styles.thumb, value ? styles.thumbOn : styles.thumbOff, { transform: [{ translateX }] }]} />
       </TouchableOpacity>
     </View>
   );
@@ -68,4 +68,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   thumb: { width: 20, height: 20, borderRadius: 10 },
+  thumbOn: { backgroundColor: '#0C0C0C' },
+  thumbOff: { backgroundColor: 'rgba(242,237,228,0.4)' },
 });

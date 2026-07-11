@@ -187,12 +187,12 @@ export default function SavePreviewScreen({ onBack, onSaved, initialUrl }: Props
               <TouchableOpacity
                 onPress={handleFetch}
                 disabled={!url.trim() || isFetching}
-                style={[styles.fetchBtn, { backgroundColor: url.trim() ? Palette.accent : Palette.input, opacity: isFetching ? 0.6 : 1 }]}
+                style={[styles.fetchBtn, url.trim() ? styles.fetchBtnActive : styles.fetchBtnInactive, isFetching ? styles.fetchBtnFetching : null]}
               >
                 {isFetching ? (
                   <ActivityIndicator size="small" color="#0C0C0C" />
                 ) : (
-                  <Text style={[styles.fetchBtnText, { color: url.trim() ? '#0C0C0C' : Palette.textDisabled }]}>Fetch</Text>
+                  <Text style={[styles.fetchBtnText, url.trim() ? styles.fetchBtnTextActive : styles.fetchBtnTextInactive]}>Fetch</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -255,7 +255,7 @@ export default function SavePreviewScreen({ onBack, onSaved, initialUrl }: Props
               <TouchableOpacity
                 onPress={handleSave}
                 disabled={!metadata || isSaving || !customTitle.trim()}
-                style={[styles.saveBtn, { opacity: !metadata || !customTitle.trim() ? 0.4 : 1 }]}
+                style={[styles.saveBtn, !metadata || !customTitle.trim() ? styles.saveBtnDisabled : null]}
                 activeOpacity={0.85}
               >
                 {isSaving ? (
@@ -346,7 +346,12 @@ const styles = StyleSheet.create({
   urlInput: { flex: 1, fontFamily: 'DMSans-Regular', fontSize: 13, color: Palette.textPrimary, padding: 12 },
   clearBtn: { padding: 8 },
   fetchBtn: { borderRadius: Radius.sm + 2, paddingVertical: 8, paddingHorizontal: 14 },
+  fetchBtnActive: { backgroundColor: Palette.accent },
+  fetchBtnInactive: { backgroundColor: Palette.input },
+  fetchBtnFetching: { opacity: 0.6 },
   fetchBtnText: { fontFamily: 'DMSans-Bold', fontSize: 12 },
+  fetchBtnTextActive: { color: '#0C0C0C' },
+  fetchBtnTextInactive: { color: Palette.textDisabled },
   pasteBtn: { marginTop: 8, alignSelf: 'flex-start' },
   pasteText: { fontFamily: 'DMSans-Regular', fontSize: 12, color: Palette.accent },
   errorText: { fontFamily: 'DMSans-Regular', fontSize: 12, color: Palette.danger, marginTop: 8 },
@@ -396,5 +401,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
   },
+  saveBtnDisabled: { opacity: 0.4 },
   saveBtnText: { fontFamily: 'DMSans-Bold', fontSize: 16, color: '#0C0C0C' },
 });

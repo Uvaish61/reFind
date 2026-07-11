@@ -17,7 +17,7 @@ export default function GradientBox({ colors, width, height, borderRadius = 0, s
   const id = React.useRef(`gradient-box-${gradientCount++}`).current;
 
   return (
-    <View style={[{ width, height, borderRadius, overflow: 'hidden' }, styles.center, style]}>
+    <View style={[{ width, height, borderRadius }, styles.center, style]}>
       <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
         <Defs>
           <LinearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -34,5 +34,5 @@ export default function GradientBox({ colors, width, height, borderRadius = 0, s
 }
 
 const styles = StyleSheet.create({
-  center: { alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
 });

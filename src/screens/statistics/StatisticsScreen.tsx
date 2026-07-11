@@ -131,7 +131,7 @@ export default function StatisticsScreen({ onBack, onOpenTag }: Props) {
             <View>
               <Text style={styles.heroLabel}>Saved this {period}</Text>
               <Text style={styles.heroValue}>{filteredItems.length}</Text>
-              <Text style={[styles.heroDelta, { color: delta >= 0 ? 'rgba(207,255,71,0.6)' : Palette.textMuted }]}>{deltaLabel}</Text>
+              <Text style={[styles.heroDelta, delta >= 0 ? styles.heroDeltaPositive : styles.heroDeltaNeutral]}>{deltaLabel}</Text>
             </View>
             <BarChart data={dailySaves} height={64} accentColor={Palette.accent} />
           </View>
@@ -201,10 +201,11 @@ export default function StatisticsScreen({ onBack, onOpenTag }: Props) {
                       onPress={() => onOpenTag(tag)}
                       style={[
                         styles.tagChip,
-                        { backgroundColor: isBig ? Palette.accent : Palette.accentDim, paddingVertical: isBig ? 6 : 4, paddingHorizontal: isBig ? 14 : 10, opacity },
+                        isBig ? styles.tagChipBig : styles.tagChipSmall,
+                        { opacity },
                       ]}
                     >
-                      <Text style={{ fontFamily: isBig ? 'DMSans-Bold' : 'DMSans-Regular', fontSize: isBig ? 13 : 11, color: isBig ? '#0C0C0C' : Palette.accent }}>
+                      <Text style={isBig ? styles.tagChipTextBig : styles.tagChipTextSmall}>
                         #{tag} · {count}
                       </Text>
                     </TouchableOpacity>
@@ -275,6 +276,8 @@ const styles = StyleSheet.create({
   heroLabel: { fontFamily: 'DMSans-Regular', fontSize: 12, color: Palette.textMuted, marginBottom: 6 },
   heroValue: { fontFamily: 'DMSerifDisplay-Italic', fontSize: 56, color: Palette.accent, lineHeight: 60 },
   heroDelta: { fontFamily: 'DMSans-Regular', fontSize: 11, marginTop: 4 },
+  heroDeltaPositive: { color: 'rgba(207,255,71,0.6)' },
+  heroDeltaNeutral: { color: Palette.textMuted },
 
   weeklyChartSection: { paddingHorizontal: Spacing.xl, marginBottom: Spacing.lg },
   card: { backgroundColor: Palette.card, borderRadius: Radius.xl, padding: Spacing.xl, borderWidth: 1, borderColor: Palette.border },
@@ -292,6 +295,10 @@ const styles = StyleSheet.create({
 
   tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tagChip: { borderRadius: Radius.sm },
+  tagChipBig: { backgroundColor: Palette.accent, paddingVertical: 6, paddingHorizontal: 14 },
+  tagChipSmall: { backgroundColor: Palette.accentDim, paddingVertical: 4, paddingHorizontal: 10 },
+  tagChipTextBig: { fontFamily: 'DMSans-Bold', fontSize: 13, color: '#0C0C0C' },
+  tagChipTextSmall: { fontFamily: 'DMSans-Regular', fontSize: 11, color: Palette.accent },
 
   heatmapGrid: { gap: 4 },
   heatmapRow: { flexDirection: 'row', gap: 4 },

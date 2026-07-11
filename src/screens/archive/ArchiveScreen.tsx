@@ -99,6 +99,10 @@ function EmptyArchive() {
   );
 }
 
+function Separator() {
+  return <View style={styles.separator} />;
+}
+
 export default function ArchiveScreen({ onBack }: Props) {
   const [items, setItems] = useState<ArchivedItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -166,7 +170,7 @@ export default function ArchiveScreen({ onBack }: Props) {
         renderItem={({ item }) => (
           <ArchiveCard item={item} onRestore={() => handleRestore(item.id)} onDelete={() => handleDelete(item.id)} />
         )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={Separator}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={!isLoading ? <EmptyArchive /> : null}
         showsVerticalScrollIndicator={false}

@@ -49,7 +49,8 @@ function NavTab({ tab, active, onPress }: { tab: TabDef; active: boolean; onPres
       <Animated.View
         style={[
           styles.iconContainer,
-          { borderRadius: shape === 'circle' ? 17 : 9, borderColor: Palette.textMuted, backgroundColor, borderWidth },
+          shape === 'circle' ? styles.iconContainerCircle : styles.iconContainerSquare,
+          { backgroundColor, borderWidth },
           { transform: [{ scale: press }] },
         ]}
       >
@@ -111,7 +112,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tab: { flexDirection: 'column', alignItems: 'center', gap: 6 },
-  iconContainer: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+  iconContainer: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderColor: Palette.textMuted },
+  iconContainerCircle: { borderRadius: 17 },
+  iconContainerSquare: { borderRadius: 9 },
   labelActive: { fontFamily: 'DMSans-SemiBold', fontSize: 10, color: Palette.accent },
   labelInactive: { fontFamily: 'DMSans-Regular', fontSize: 10, color: Palette.textDisabled },
   addBtn: {

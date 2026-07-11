@@ -54,6 +54,10 @@ type Props = {
   initialQuery?: string;
 };
 
+function Separator() {
+  return <View style={styles.separator} />;
+}
+
 export default function SearchScreen({ navigate, onOpenTag, initialQuery }: Props) {
   const [allItems, setAllItems] = useState<SavedItem[]>([]);
   const [query, setQuery] = useState(initialQuery ?? '');
@@ -249,7 +253,7 @@ export default function SearchScreen({ navigate, onOpenTag, initialQuery }: Prop
           />
         )}
         contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={Separator}
         ListHeaderComponent={
           showResultsCount ? (
             <View style={styles.resultsCountRow}>

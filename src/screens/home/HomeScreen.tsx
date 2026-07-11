@@ -15,6 +15,10 @@ type Props = {
   navigate: (screen: Screen) => void;
 };
 
+function Separator() {
+  return <View style={styles.separator} />;
+}
+
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
@@ -42,8 +46,8 @@ function SkeletonCard() {
     <Animated.View style={[styles.card, styles.skeletonCard, { opacity }]}>
       <View style={styles.skeletonThumb} />
       <View style={styles.skeletonInfo}>
-        <View style={[styles.skeletonLine, { width: '70%' }]} />
-        <View style={[styles.skeletonLine, { width: '45%', height: 8, marginTop: 8 }]} />
+        <View style={[styles.skeletonLine, styles.skeletonLineTitle]} />
+        <View style={[styles.skeletonLine, styles.skeletonLineSubtitle]} />
       </View>
     </Animated.View>
   );
@@ -134,7 +138,7 @@ export default function HomeScreen({ navigate }: Props) {
               )}
               scrollEnabled={false}
               contentContainerStyle={styles.listContent}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ItemSeparatorComponent={Separator}
               ListEmptyComponent={<EmptyState />}
             />
           )}
@@ -214,6 +218,8 @@ const styles = StyleSheet.create({
   skeletonThumb: { width: 62, height: 62, borderRadius: Radius.md, backgroundColor: '#1e1e1e' },
   skeletonInfo: { flex: 1, justifyContent: 'center' },
   skeletonLine: { height: 10, borderRadius: 5, backgroundColor: '#1e1e1e' },
+  skeletonLineTitle: { width: '70%' },
+  skeletonLineSubtitle: { width: '45%', height: 8, marginTop: 8 },
 
   emptyState: { alignItems: 'center', paddingVertical: 60 },
   emptyTitle: { fontFamily: 'DMSerifDisplay-Italic', fontSize: 22, color: Palette.textPrimary, marginTop: 16 },
